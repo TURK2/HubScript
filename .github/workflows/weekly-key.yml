@@ -2,33 +2,37 @@ name: Weekly Key Generator
 
 on:
   schedule:
-    - cron: "0 0 * * 1"
+    - cron: '0 0 * * 1'   # ทุกวันจันทร์
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   generate-key:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Generate Key
+      - name: Generate key
         run: |
-          KEY="TURK-$(openssl rand -hex 3 | tr a-z A-Z)"
+          KEY="TURK-$(date +%s | sha256sum | head -c 10)"
           echo $KEY > KEY
-          echo "KEY=$KEY" >> $GITHUB_ENV
+          echo "Generated key: $KEY"
 
-      - name: Commit Key
+      - name: Commit key
         run: |
-          git config --global user.name "key-bot"
-          git config --global user.email "bot@github.com"
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
           git add KEY
           git commit -m "Update weekly key"
           git push
 
-      - name: Send to Discord
+      - name: Send key to Discord
         run: |
+          KEY=$(cat KEY)
           curl -H "Content-Type: application/json" \
-          -d "{\"content\":\"🔑 TURK HUB Weekly Key\n\nKey: $KEY\"}" \
+          -d "{\"content\":\"New Weekly Key: $KEY\"}" \
           ${{ secrets.DISCORD_WEBHOOK }}
