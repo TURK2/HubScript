@@ -2,7 +2,7 @@ name: TURKHUB KEY SYSTEM
 
 on:
   schedule:
-    - cron: '*/5 * * * *'   # ทุก 5 นาที (TEST)
+    - cron: '0 17 * * *'   # ทุก 5 นาที (TEST)
   workflow_dispatch:
 
 jobs:
