@@ -1,73 +1,103 @@
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+if not game:IsLoaded() then
+    game.Loaded:Wait()
+end
 
 local KEY_URL = "https://raw.githubusercontent.com/TURK2/HubScript/main/KEY"
-local GAME_SCRIPT_URL = "https://raw.githubusercontent.com/TURK2/HubScript/main/Games/"
-local DISCORD = "https://discord.gg/yourdiscord"
+local GAME_URL = "https://raw.githubusercontent.com/TURK2/HubScript/main/Games/"
+local DISCORD = "https://discord.com/invite/v3dAeMKp4N"
 
-local correctKey = game:HttpGet(KEY_URL)
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
--- UI
-local gui = Instance.new("ScreenGui")
-gui.Parent = game.CoreGui
+local function GetKey()
+    local data = game:HttpGet(KEY_URL)
+    return data:gsub("%s+","")
+end
 
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0,300,0,200)
-frame.Position = UDim2.new(0.5,-150,0.5,-100)
-frame.Parent = gui
+local CorrectKey = GetKey()
 
-local box = Instance.new("TextBox")
-box.Size = UDim2.new(0,260,0,40)
-box.Position = UDim2.new(0,20,0,30)
-box.PlaceholderText = "Enter Key"
-box.Parent = frame
+local Window = Rayfield:CreateWindow({
+    Name = "TURK HUB | Key System",
+    LoadingTitle = "TURK HUB",
+    LoadingSubtitle = "Authentication",
+    Theme = "DarkBlue",
+    DisableRayfieldPrompts = true
+})
 
-local verify = Instance.new("TextButton")
-verify.Size = UDim2.new(0,120,0,40)
-verify.Position = UDim2.new(0,20,0,100)
-verify.Text = "Verify Key"
-verify.Parent = frame
+local Tab = Window:CreateTab("Key","lock")
 
-local discord = Instance.new("TextButton")
-discord.Size = UDim2.new(0,120,0,40)
-discord.Position = UDim2.new(0,160,0,100)
-discord.Text = "Copy Discord"
-discord.Parent = frame
+local UserKey = ""
 
--- copy discord
-discord.MouseButton1Click:Connect(function()
-    setclipboard(DISCORD)
-end)
+Tab:CreateInput({
+    Name = "Enter Key",
+    PlaceholderText = "Paste key",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(text)
+        UserKey = text
+    end
+})
 
--- verify key
-verify.MouseButton1Click:Connect(function()
+Tab:CreateButton({
+    Name = "Verify Key",
+    Callback = function()
 
-    if box.Text == correctKey then
+        if UserKey == CorrectKey then
 
-        local gameID = game.PlaceId
+            Rayfield:Notify({
+                Title = "Key Correct",
+                Content = "Loading script...",
+                Duration = 3
+            })
 
-        local success, script = pcall(function()
-            return game:HttpGet(GAME_SCRIPT_URL .. gameID .. ".lua")
-        end)
+            local id = game.PlaceId
 
-        if success then
+            local success,script = pcall(function()
+                return game:HttpGet(GAME_URL..id..".lua")
+            end)
 
-            gui:Destroy()
+            if success and script then
 
-            loadstring(script)()
+                Rayfield:Destroy()
+
+                loadstring(script)()
+
+            else
+
+                game.Players.LocalPlayer:Kick(
+                "Game not supported.\nContact Discord:\n"..DISCORD
+                )
+
+            end
 
         else
 
-            player:Kick(
-                "This game is not supported.\nContact support: "..DISCORD
-            )
+            pcall(function()
+                setclipboard(DISCORD)
+            end)
+
+            Rayfield:Notify({
+                Title = "Invalid Key",
+                Content = "Discord copied. Get key there.",
+                Duration = 5
+            })
 
         end
 
-    else
+    end
+})
 
-        box.Text = "Invalid Key"
+Tab:CreateButton({
+    Name = "Copy Discord",
+    Callback = function()
+
+        pcall(function()
+            setclipboard(DISCORD)
+        end)
+
+        Rayfield:Notify({
+            Title = "Copied",
+            Content = "Discord copied",
+            Duration = 3
+        })
 
     end
-
-end)
+})
