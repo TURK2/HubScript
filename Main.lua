@@ -1,8 +1,8 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
-local KEY_URL = "https://raw.githubusercontent.com/TURK2/HubScript/main/key.txt"
-local GAME_SCRIPT_URL = "https://raw.githubusercontent.com/TURK2/HubScript/main/games/"
+local KEY_URL = "https://raw.githubusercontent.com/TURK2/HubScript/main/KEY"
+local GAME_SCRIPT_URL = "https://raw.githubusercontent.com/TURK2/HubScript/main/Games/"
 local DISCORD = "https://discord.gg/yourdiscord"
 
 local correctKey = game:HttpGet(KEY_URL)
