@@ -1,56 +1,46 @@
-name: TURKHUB KEY SYSTEM
+name: Daily Key
 
 on:
   schedule:
-    # 00:00 Thailand = 17:00 UTC
     - cron: "0 17 * * *"
   workflow_dispatch:
 
 jobs:
-  generate-key:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repo
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Generate New Key
+      - name: Generate Key
         run: |
-          KEY="TURKHUB-$(openssl rand -hex 3)"
+          KEY="TURKHUB-$(openssl rand -hex 4)"
           echo $KEY > KEY
           echo "KEY=$KEY" >> $GITHUB_ENV
 
-      - name: Commit New Key
+      - name: Commit Key
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
+          git config --global user.name "keybot"
+          git config --global user.email "bot@github.com"
           git add KEY
-          git commit -m "Auto Update Key"
+          git commit -m "Update Daily Key"
           git push
 
-      - name: Send Key To Discord
+      - name: Send Discord
         run: |
           curl -H "Content-Type: application/json" \
--d '{
-  "embeds": [{
-    "title": "🔑 New Key Generated",
-    "description": "Key ใหม่ถูกสร้างเรียบร้อย",
-    "color": 3066993,
-    "fields": [
-      {
-        "name": "Key",
-        "value": "KEY_HERE",
-        "inline": false
-      },
-      {
-        "name": "Time",
-        "value": "00:00 Generated",
-        "inline": true
-      }
-    ],
-    "footer": {
-      "text": "Auto Key System"
-    }
-  }]
-}' \
-          https://discord.com/api/webhooks/1479462633383006373/p_GjlNQrYuQuZulcen9SxJExpZMF4oYdqQsMD235rYvmapsBTIQdhoHXlmrz0gzEkVLO
+          -d "{
+          \"embeds\": [{
+          \"title\": \"🗝️ KEYNEW\",
+          \"description\": \"Key reset every day 00:00\",
+          \"color\": 3066993,
+          \"fields\": [
+          {
+          \"name\": \"Key\",
+          \"value\": \"${KEY}\"
+          }
+          ]
+          }]
+          }" \
+          ${{ secrets.DISCORD_WEBHOOK }}
