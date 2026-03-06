@@ -1,8 +1,8 @@
-name: Weekly Key Generator
+name: Daily Key Generator
 
 on:
   schedule:
-    - cron: '0 0 * * 1'   # ทุกวันจันทร์
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 permissions:
@@ -16,23 +16,33 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Generate key
+      - name: Generate Key
         run: |
-          KEY="TURK-$(date +%s | sha256sum | head -c 10)"
-          echo $KEY > KEY
-          echo "Generated key: $KEY"
+          KEY="TURKHUB-$(openssl rand -hex 4)"
+          DEVKEY="TURKHUB-DEV-$(openssl rand -hex 6)"
 
-      - name: Commit key
+          echo $KEY > KEY
+          echo $DEVKEY > DEVKEY
+
+      - name: Commit new keys
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
-          git add KEY
-          git commit -m "Update weekly key"
+          git add KEY DEVKEY
+          git commit -m "Update daily key"
           git push
 
-      - name: Send key to Discord
+      - name: Send Key To Discord
         run: |
           KEY=$(cat KEY)
+
           curl -H "Content-Type: application/json" \
-          -d "{\"content\":\"New Weekly Key: $KEY\"}" \
+          -d "{
+            \"content\": \"@everyone\",
+            \"embeds\": [{
+              \"title\": \"KEYNEW 🗝️\",
+              \"description\": \"The key resets every day at 00:00 AM.\n\nCopy Key Below:\n\`\`\`$KEY\`\`\`\",
+              \"color\": 65280
+            }]
+          }" \
           ${{ secrets.DISCORD_WEBHOOK }}
