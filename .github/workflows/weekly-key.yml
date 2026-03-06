@@ -1,175 +1,35 @@
--- Prevent double run
-if getgenv().TURKHUB_LOADED then return end
-getgenv().TURKHUB_LOADED = true
+name: TURKHUB KEY SYSTEM
 
--- Wait game load
-if not game:IsLoaded() then
-    game.Loaded:Wait()
-end
+on:
+  schedule:
+    # 00:00 Thailand = 17:00 UTC
+    - cron: "0 17 * * *"
+  workflow_dispatch:
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
+jobs:
+  generate-key:
+    runs-on: ubuntu-latest
 
--- =========================
--- SETTINGS
--- =========================
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
 
-local Discord = "https://discord.com/invite/v3dAeMKp4N"
-local KeyURL = "https://raw.githubusercontent.com/TURK2/HubScript/main/KEY"
-local LoaderURL = "https://raw.githubusercontent.com/TURK2/HubScript/main/Run/Loader.lua"
+      - name: Generate New Key
+        run: |
+          KEY="TURKHUB-$(openssl rand -hex 3)"
+          echo $KEY > KEY
+          echo "KEY=$KEY" >> $GITHUB_ENV
 
--- Whitelist Players (Run without key)
-local Whitelist = {
-    "maytawin29",
-    "maytawin_test"
-}
+      - name: Commit New Key
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add KEY
+          git commit -m "Auto Update Key"
+          git push
 
--- =========================
--- WHITELIST CHECK
--- =========================
-
-for _,name in pairs(Whitelist) do
-    if LocalPlayer.Name == name then
-        loadstring(game:HttpGet(LoaderURL))()
-        return
-    end
-end
-
--- =========================
--- COPY DISCORD
--- =========================
-
-pcall(function()
-    setclipboard(Discord)
-end)
-
--- =========================
--- LOAD UI
--- =========================
-
-local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
-
--- =========================
--- GET KEYS
--- =========================
-
-local function GetKeys()
-
-    local data = ""
-
-    pcall(function()
-        data = game:HttpGet(KeyURL)
-    end)
-
-    local keys = {}
-
-    for line in string.gmatch(data,"[^\r\n]+") do
-        table.insert(keys,line)
-    end
-
-    return keys
-end
-
-local ValidKeys = GetKeys()
-
--- =========================
--- UI WINDOW
--- =========================
-
-local Window = Rayfield:CreateWindow({
-    Name = "TURK HUB | Key System",
-    LoadingTitle = "TURK HUB",
-    LoadingSubtitle = "Secure Loader",
-    Theme = "DarkBlue"
-})
-
-local Tab = Window:CreateTab("Authentication","lock")
-
-local UserKey = ""
-
--- =========================
--- KEY INPUT
--- =========================
-
-Tab:CreateInput({
-    Name = "Enter Key",
-    PlaceholderText = "Paste key here",
-    RemoveTextAfterFocusLost = false,
-
-    Callback = function(Text)
-        UserKey = Text
-    end
-})
-
--- =========================
--- SUBMIT KEY
--- =========================
-
-Tab:CreateButton({
-
-    Name = "Submit Key",
-
-    Callback = function()
-
-        local Valid = false
-
-        for _,k in pairs(ValidKeys) do
-            if UserKey == k then
-                Valid = true
-                break
-            end
-        end
-
-        if Valid then
-
-            Rayfield:Notify({
-                Title = "Access Granted",
-                Content = "Loading Hub...",
-                Duration = 4
-            })
-
-            task.wait(1)
-
-            loadstring(game:HttpGet(LoaderURL))()
-
-            Rayfield:Destroy()
-
-        else
-
-            pcall(function()
-                setclipboard(Discord)
-            end)
-
-            Rayfield:Notify({
-                Title = "Invalid Key",
-                Content = "Join Discord to get key (copied)",
-                Duration = 5
-            })
-
-        end
-
-    end
-})
-
--- =========================
--- COPY DISCORD BUTTON
--- =========================
-
-Tab:CreateButton({
-
-    Name = "Copy Discord Invite",
-
-    Callback = function()
-
-        pcall(function()
-            setclipboard(Discord)
-        end)
-
-        Rayfield:Notify({
-            Title = "Copied",
-            Content = "Discord link copied",
-            Duration = 3
-        })
-
-    end
-})
+      - name: Send Key To Discord
+        run: |
+          curl -H "Content-Type: application/json" \
+          -d "{\"content\":\"@everyone\nKEYNEW 🗝️\nKey resets every day at 00:00 AM\n\nKey:\n\`\`\`${{ env.KEY }}\`\`\`\"}" \
+          YOUR_DISCORD_WEBHOOK
