@@ -1,1 +1,0 @@
-print("Game script loaded")
