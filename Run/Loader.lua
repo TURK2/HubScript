@@ -1,26 +1,23 @@
-local Players = game:GetService("Players")
+-- TURK HUB Loader
 
-local Discord = "https://discord.com/invite/v3dAeMKp4N"
+if not game:IsLoaded() then
+    game.Loaded:Wait()
+end
 
-local placeId = game.PlaceId
+-- ป้องกันรันซ้ำ
+if getgenv().TURK_LOADER then
+    return
+end
+getgenv().TURK_LOADER = true
 
-local GameURL =
-"https://raw.githubusercontent.com/TURK2/HUB/main/Games/"..placeId..".lua"
+-- Main script URL
+local MAIN_URL = "https://raw.githubusercontent.com/TURK2/HubScript/main/Main.lua"
 
+-- โหลด Main
 local success,err = pcall(function()
-
-    loadstring(game:HttpGet(GameURL))()
-
+    loadstring(game:HttpGet(MAIN_URL))()
 end)
 
 if not success then
-
-    pcall(function()
-        setclipboard(Discord)
-    end)
-
-    Players.LocalPlayer:Kick(
-        "This game is not supported.\nPlease contact support on Discord:\n"..Discord
-    )
-
+    warn("TURK HUB failed to load:",err)
 end
