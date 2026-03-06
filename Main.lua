@@ -1,120 +1,73 @@
--- wait game
-if not game:IsLoaded() then
-    game.Loaded:Wait()
-end
-
-if getgenv().TURK_HUB then
-    return
-end
-getgenv().TURK_HUB = true
-
 local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local KEY_URL = "https://raw.githubusercontent.com/TURK2/HubScript/main/key.txt"
+local GAME_SCRIPT_URL = "https://raw.githubusercontent.com/TURK2/HubScript/main/games/"
+local DISCORD = "https://discord.gg/yourdiscord"
+
+local correctKey = game:HttpGet(KEY_URL)
 
 -- UI
-local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+local gui = Instance.new("ScreenGui")
+gui.Parent = game.CoreGui
 
--- links
-local Discord = "https://discord.com/invite/v3dAeMKp4N"
-local KeyURL = "https://raw.githubusercontent.com/TURK2/HUB/main/KEY"
-local LoaderURL = "https://raw.githubusercontent.com/TURK2/HUB/main/Run/Loader.lua"
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0,300,0,200)
+frame.Position = UDim2.new(0.5,-150,0.5,-100)
+frame.Parent = gui
 
-pcall(function()
-    setclipboard(Discord)
+local box = Instance.new("TextBox")
+box.Size = UDim2.new(0,260,0,40)
+box.Position = UDim2.new(0,20,0,30)
+box.PlaceholderText = "Enter Key"
+box.Parent = frame
+
+local verify = Instance.new("TextButton")
+verify.Size = UDim2.new(0,120,0,40)
+verify.Position = UDim2.new(0,20,0,100)
+verify.Text = "Verify Key"
+verify.Parent = frame
+
+local discord = Instance.new("TextButton")
+discord.Size = UDim2.new(0,120,0,40)
+discord.Position = UDim2.new(0,160,0,100)
+discord.Text = "Copy Discord"
+discord.Parent = frame
+
+-- copy discord
+discord.MouseButton1Click:Connect(function()
+    setclipboard(DISCORD)
 end)
 
--- get keys
-local function GetKeys()
+-- verify key
+verify.MouseButton1Click:Connect(function()
 
-    local data = game:HttpGet(KeyURL)
-    local keys = {}
+    if box.Text == correctKey then
 
-    for line in string.gmatch(data,"[^\r\n]+") do
-        table.insert(keys,line)
-    end
+        local gameID = game.PlaceId
 
-    return keys
-end
-
-local ValidKeys = GetKeys()
-
--- UI
-local Window = Rayfield:CreateWindow({
-    Name = "TURK HUB | Key System",
-    LoadingTitle = "TURK HUB",
-    LoadingSubtitle = "Authentication",
-    Theme = "DarkBlue"
-})
-
-local Tab = Window:CreateTab("Key","lock")
-
-local UserKey = ""
-
-Tab:CreateInput({
-    Name = "Enter Key",
-    PlaceholderText = "Paste key here",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(text)
-        UserKey = text
-    end
-})
-
-Tab:CreateButton({
-    Name = "Submit Key",
-    Callback = function()
-
-        local valid = false
-
-        for _,k in pairs(ValidKeys) do
-            if UserKey == k then
-                valid = true
-                break
-            end
-        end
-
-        if not valid then
-
-            pcall(function()
-                setclipboard(Discord)
-            end)
-
-            Rayfield:Notify({
-                Title = "Invalid Key",
-                Content = "Join our Discord to get the key (copied)",
-                Duration = 5
-            })
-
-            return
-        end
-
-        -- key correct
-        Rayfield:Notify({
-            Title = "Access Granted",
-            Content = "Loading...",
-            Duration = 3
-        })
-
-        wait(1)
-
-        loadstring(game:HttpGet(LoaderURL))()
-
-        Rayfield:Destroy()
-
-    end
-})
-
-Tab:CreateButton({
-    Name = "Copy Discord",
-    Callback = function()
-
-        pcall(function()
-            setclipboard(Discord)
+        local success, script = pcall(function()
+            return game:HttpGet(GAME_SCRIPT_URL .. gameID .. ".lua")
         end)
 
-        Rayfield:Notify({
-            Title = "Copied",
-            Content = "Discord link copied",
-            Duration = 3
-        })
+        if success then
+
+            gui:Destroy()
+
+            loadstring(script)()
+
+        else
+
+            player:Kick(
+                "This game is not supported.\nContact support: "..DISCORD
+            )
+
+        end
+
+    else
+
+        box.Text = "Invalid Key"
 
     end
-}) 
+
+end)
