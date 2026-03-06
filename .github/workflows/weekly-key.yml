@@ -1,48 +1,32 @@
-name: TURKHUB Daily Key
+name: TURKHUB Key Generator
 
 on:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: '40 19 * * *'   # 00:00 Thailand (UTC+7)
   workflow_dispatch:
 
 jobs:
   generate-key:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     steps:
 
-    - name: Checkout repository
+    - name: Checkout repo
       uses: actions/checkout@v3
 
-    - name: Generate Key
+    - name: Generate new key
       run: |
-        KEY="TURKHUB-$(openssl rand -hex 4)"
+        KEY="TURKHUB-$(date +%s | sha256sum | head -c 6)"
         echo $KEY > KEY
-        echo "KEY=$KEY" >> $GITHUB_ENV
+        echo "New key: $KEY"
 
-    - name: Commit Key
+    - name: Commit new key
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "github-actions"
+        git config user.name "turkhub-bot"
+        git config user.email "bot@github.com"
         git add KEY
-        git commit -m "Update daily key"
+        git commit -m "Auto update key"
         git push
-
-    - name: Send Discord Webhook
-      run: |
-        curl -H "Content-Type: application/json" \
-        -d "{
-        \"embeds\": [{
-        \"title\": \"🗝️ KEYNEW\",
-        \"description\": \"New key generated (every 00:00 UTC)\",
-        \"color\": 3066993,
-        \"fields\": [{
-        \"name\": \"Key\",
-        \"value\": \"\`${{ env.KEY }}\`\"
-        }],
-        \"footer\": {
-        \"text\": \"TURK HUB KEY SYSTEM\"
-        }
-        }]
-        }" \
-        ${{ secrets.DISCORD_WEBHOOK }}
