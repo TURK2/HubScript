@@ -32,4 +32,4 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
           -d "{\"content\":\"@everyone\nKEYNEW 🗝️\nKey resets every day at 00:00 AM\n\nKey:\n\`\`\`${{ env.KEY }}\`\`\`\"}" \
-          YOUR_DISCORD_WEBHOOK
+          https://discord.com/api/webhooks/1479462633383006373/p_GjlNQrYuQuZulcen9SxJExpZMF4oYdqQsMD235rYvmapsBTIQdhoHXlmrz0gzEkVLO
