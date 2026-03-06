@@ -1,46 +1,48 @@
-name: Daily Key
+name: TURKHUB Daily Key
 
 on:
   schedule:
-    - cron: "0 17 * * *"
+    - cron: "0 0 * * *"
   workflow_dispatch:
 
 jobs:
-  build:
+  generate-key:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
 
-      - name: Generate Key
-        run: |
-          KEY="TURKHUB-$(openssl rand -hex 4)"
-          echo $KEY > KEY
-          echo "KEY=$KEY" >> $GITHUB_ENV
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Commit Key
-        run: |
-          git config --global user.name "keybot"
-          git config --global user.email "bot@github.com"
-          git add KEY
-          git commit -m "Update Daily Key"
-          git push
+    - name: Generate Key
+      run: |
+        KEY="TURKHUB-$(openssl rand -hex 4)"
+        echo $KEY > KEY
+        echo "KEY=$KEY" >> $GITHUB_ENV
 
-      - name: Send Discord
-        run: |
-          curl -H "Content-Type: application/json" \
-          -d "{
-          \"embeds\": [{
-          \"title\": \"🗝️ KEYNEW\",
-          \"description\": \"Key reset every day 00:00\",
-          \"color\": 3066993,
-          \"fields\": [
-          {
-          \"name\": \"Key\",
-          \"value\": \"${KEY}\"
-          }
-          ]
-          }]
-          }" \
-          ${{ secrets.DISCORD_WEBHOOK }}
+    - name: Commit Key
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "github-actions"
+        git add KEY
+        git commit -m "Update daily key"
+        git push
+
+    - name: Send Discord Webhook
+      run: |
+        curl -H "Content-Type: application/json" \
+        -d "{
+        \"embeds\": [{
+        \"title\": \"🗝️ KEYNEW\",
+        \"description\": \"New key generated (every 00:00 UTC)\",
+        \"color\": 3066993,
+        \"fields\": [{
+        \"name\": \"Key\",
+        \"value\": \"\`${{ env.KEY }}\`\"
+        }],
+        \"footer\": {
+        \"text\": \"TURK HUB KEY SYSTEM\"
+        }
+        }]
+        }" \
+        ${{ secrets.DISCORD_WEBHOOK }}
