@@ -38,7 +38,7 @@ jobs:
         "content": "@everyone",
         "embeds":[
           {
-            "title":"🗝️ TURK HUB TEST KEY",
+            "title":"🗝️ TURK HUB KEY",
             "description":"Test key auto system",
             "color":5763719,
             "fields":[
