@@ -20,7 +20,7 @@ local function getHRP()
     return char:WaitForChild("HumanoidRootPart")
 end
 
--- หา CFrame ของ object
+-- หา CFrame object
 local function getCF(obj)
     if obj:IsA("BasePart") then
         return obj.CFrame
@@ -29,7 +29,7 @@ local function getCF(obj)
     end
 end
 
--- AUTO FARM NIVEL21
+-- AUTO FARM NIVEL21 + ขยับตัว
 local AutoFarm = false
 
 MainTab:CreateToggle({
@@ -41,21 +41,24 @@ MainTab:CreateToggle({
       task.spawn(function()
         while AutoFarm do
 
-            local nivel = workspace:FindFirstChild("Entorno")
-            if nivel then
-                local n21 = nivel:FindFirstChild("Nivel21")
-                if n21 and n21:FindFirstChild("Gameplay") then
+            local entorno = workspace:FindFirstChild("Entorno")
+            if entorno then
+                local nivel = entorno:FindFirstChild("Nivel21")
 
-                    local boton = n21.Gameplay:FindFirstChild("BotonWins")
+                if nivel and nivel:FindFirstChild("Gameplay") then
+                    local boton = nivel.Gameplay:FindFirstChild("BotonWins")
 
                     if boton then
-                        getHRP().CFrame = getCF(boton) + Vector3.new(0,3,0)
-                    end
+                        local hrp = getHRP()
+                        hrp.CFrame = getCF(boton) + Vector3.new(0,3,0)
 
+                        -- ขยับตัวเล็กน้อย
+                        hrp.CFrame = hrp.CFrame * CFrame.new(0,0,1)
+                    end
                 end
             end
 
-            task.wait()
+            task.wait(0.5) -- วาร์ปทุก 0.5 วินาที
         end
       end)
 
@@ -73,7 +76,6 @@ MainTab:CreateToggle({
 
       task.spawn(function()
         while AutoBuy do
-
             local char = Player.Character or Player.CharacterAdded:Wait()
             local remote = char:WaitForChild("Eventos"):WaitForChild("Mejorar")
 
@@ -81,7 +83,7 @@ MainTab:CreateToggle({
             remote:FireServer("Combustible", true)
             remote:FireServer("Trofeos", true)
 
-            task.wait()
+            task.wait(0.5)
         end
       end)
 
@@ -99,13 +101,12 @@ MainTab:CreateToggle({
 
       task.spawn(function()
         while AutoRebirth do
-
             local char = Player.Character or Player.CharacterAdded:Wait()
             local rebirth = char:WaitForChild("Eventos"):WaitForChild("Renacimiento")
 
             rebirth:FireServer()
 
-            task.wait()
+            task.wait(0.5)
         end
       end)
 
