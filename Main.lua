@@ -63,7 +63,7 @@ Tab:CreateButton({
             else
 
                 game.Players.LocalPlayer:Kick(
-                "Game not supported.\nContact Discord:\n"..DISCORD
+                "Game not supported.\nContact Discord: https://discord.com/invite/v3dAeMKp4N \n"..DISCORD
                 )
 
             end
