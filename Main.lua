@@ -1,26 +1,33 @@
--- Anti double run
-if getgenv().TURKHUB_LOADED then
-    return
-end
+if getgenv().TURKHUB_LOADED then return end
 getgenv().TURKHUB_LOADED = true
 
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
 
--- Services
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
+-- Whitelist Player
+local WhitelistPlayers = {
+    "maytawin29",
+    "maytawin_test"
+}
+
 -- Links
 local Discord = "https://discord.com/invite/v3dAeMKp4N"
-
 local KeyURL = "https://raw.githubusercontent.com/TURK2/HubScript/main/KEY"
-local DevKeyURL = "https://raw.githubusercontent.com/TURK2/HubScript/main/DEVKEY"
-
 local LoaderURL = "https://raw.githubusercontent.com/TURK2/HubScript/main/Run/Loader.lua"
 
--- Copy discord auto
+-- Check Whitelist
+for _,name in pairs(WhitelistPlayers) do
+    if LocalPlayer.Name == name then
+        loadstring(game:HttpGet(LoaderURL))()
+        return
+    end
+end
+
+-- Copy discord
 pcall(function()
     setclipboard(Discord)
 end)
@@ -29,12 +36,11 @@ end)
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 -- Get Keys
-local function GetKeys(url)
+local function GetKeys()
 
     local data = ""
-
     pcall(function()
-        data = game:HttpGet(url)
+        data = game:HttpGet(KeyURL)
     end)
 
     local keys = {}
@@ -46,24 +52,20 @@ local function GetKeys(url)
     return keys
 end
 
-local NormalKeys = GetKeys(KeyURL)
-local DevKeys = GetKeys(DevKeyURL)
+local ValidKeys = GetKeys()
 
--- Create Window
+-- Window
 local Window = Rayfield:CreateWindow({
-    Name = "TURK HUB | Authentication",
+    Name = "TURK HUB | Key System",
     LoadingTitle = "TURK HUB",
     LoadingSubtitle = "Secure Loader",
-    Theme = "DarkBlue",
-    DisableRayfieldPrompts = true
+    Theme = "DarkBlue"
 })
 
--- Tab
-local KeyTab = Window:CreateTab("Key System","lock")
+local KeyTab = Window:CreateTab("Authentication","lock")
 
 local UserKey = ""
 
--- Input
 KeyTab:CreateInput({
     Name = "Enter Key",
     PlaceholderText = "Paste your key here",
@@ -73,30 +75,20 @@ KeyTab:CreateInput({
     end
 })
 
--- Validate function
-local function CheckKey()
-
-    for _,k in pairs(NormalKeys) do
-        if UserKey == k then
-            return true
-        end
-    end
-
-    for _,k in pairs(DevKeys) do
-        if UserKey == k then
-            return true
-        end
-    end
-
-    return false
-end
-
--- Submit Button
 KeyTab:CreateButton({
     Name = "Submit Key",
     Callback = function()
 
-        if CheckKey() then
+        local Valid = false
+
+        for _,k in pairs(ValidKeys) do
+            if UserKey == k then
+                Valid = true
+                break
+            end
+        end
+
+        if Valid then
 
             Rayfield:Notify({
                 Title = "Access Granted",
@@ -106,7 +98,6 @@ KeyTab:CreateButton({
 
             wait(1)
 
-            -- Load loader
             loadstring(game:HttpGet(LoaderURL))()
 
             Rayfield:Destroy()
@@ -119,8 +110,8 @@ KeyTab:CreateButton({
 
             Rayfield:Notify({
                 Title = "Invalid Key",
-                Content = "Join our Discord to get the key (copied)",
-                Duration = 6
+                Content = "Join our Discord to get key (copied)",
+                Duration = 5
             })
 
         end
@@ -128,7 +119,6 @@ KeyTab:CreateButton({
     end
 })
 
--- Copy Discord
 KeyTab:CreateButton({
     Name = "Copy Discord Invite",
     Callback = function()
@@ -139,7 +129,7 @@ KeyTab:CreateButton({
 
         Rayfield:Notify({
             Title = "Copied",
-            Content = "Discord link copied to clipboard",
+            Content = "Discord link copied",
             Duration = 3
         })
 
