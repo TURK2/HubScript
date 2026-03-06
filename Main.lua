@@ -1,83 +1,126 @@
+-- Anti double run
+if getgenv().TURKHUB_LOADED then
+    return
+end
+getgenv().TURKHUB_LOADED = true
+
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
 
-local KEY_URL = "https://raw.githubusercontent.com/TURK2/HubScript/main/KEY"
-local GAME_URL = "https://raw.githubusercontent.com/TURK2/HubScript/main/Games/"
-local DISCORD = "https://discord.com/invite/v3dAeMKp4N"
+-- Services
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
+-- Links
+local Discord = "https://discord.com/invite/v3dAeMKp4N"
+
+local KeyURL = "https://raw.githubusercontent.com/TURK2/HubScript/main/KEY"
+local DevKeyURL = "https://raw.githubusercontent.com/TURK2/HubScript/main/DEVKEY"
+
+local LoaderURL = "https://raw.githubusercontent.com/TURK2/HubScript/main/Run/Loader.lua"
+
+-- Copy discord auto
+pcall(function()
+    setclipboard(Discord)
+end)
+
+-- Load UI
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
-local function GetKey()
-    local data = game:HttpGet(KEY_URL)
-    return data:gsub("%s+","")
+-- Get Keys
+local function GetKeys(url)
+
+    local data = ""
+
+    pcall(function()
+        data = game:HttpGet(url)
+    end)
+
+    local keys = {}
+
+    for line in string.gmatch(data,"[^\r\n]+") do
+        table.insert(keys,line)
+    end
+
+    return keys
 end
 
-local CorrectKey = GetKey()
+local NormalKeys = GetKeys(KeyURL)
+local DevKeys = GetKeys(DevKeyURL)
 
+-- Create Window
 local Window = Rayfield:CreateWindow({
-    Name = "TURK HUB | Key System",
+    Name = "TURK HUB | Authentication",
     LoadingTitle = "TURK HUB",
-    LoadingSubtitle = "Authentication",
+    LoadingSubtitle = "Secure Loader",
     Theme = "DarkBlue",
     DisableRayfieldPrompts = true
 })
 
-local Tab = Window:CreateTab("Key","lock")
+-- Tab
+local KeyTab = Window:CreateTab("Key System","lock")
 
 local UserKey = ""
 
-Tab:CreateInput({
+-- Input
+KeyTab:CreateInput({
     Name = "Enter Key",
-    PlaceholderText = "Paste key",
+    PlaceholderText = "Paste your key here",
     RemoveTextAfterFocusLost = false,
-    Callback = function(text)
-        UserKey = text
+    Callback = function(Text)
+        UserKey = Text
     end
 })
 
-Tab:CreateButton({
-    Name = "Verify Key",
+-- Validate function
+local function CheckKey()
+
+    for _,k in pairs(NormalKeys) do
+        if UserKey == k then
+            return true
+        end
+    end
+
+    for _,k in pairs(DevKeys) do
+        if UserKey == k then
+            return true
+        end
+    end
+
+    return false
+end
+
+-- Submit Button
+KeyTab:CreateButton({
+    Name = "Submit Key",
     Callback = function()
 
-        if UserKey == CorrectKey then
+        if CheckKey() then
 
             Rayfield:Notify({
-                Title = "Key Correct",
-                Content = "Loading script...",
-                Duration = 3
+                Title = "Access Granted",
+                Content = "Loading Hub...",
+                Duration = 4
             })
 
-            local id = game.PlaceId
+            wait(1)
 
-            local success,script = pcall(function()
-                return game:HttpGet(GAME_URL..id..".lua")
-            end)
+            -- Load loader
+            loadstring(game:HttpGet(LoaderURL))()
 
-            if success and script then
-
-                Rayfield:Destroy()
-
-                loadstring(script)()
-
-            else
-
-                game.Players.LocalPlayer:Kick(
-                "Game not supported.\nContact Discord: https://discord.com/invite/v3dAeMKp4N \n"..DISCORD
-                )
-
-            end
+            Rayfield:Destroy()
 
         else
 
             pcall(function()
-                setclipboard(DISCORD)
+                setclipboard(Discord)
             end)
 
             Rayfield:Notify({
                 Title = "Invalid Key",
-                Content = "Discord copied. Get key there.",
-                Duration = 5
+                Content = "Join our Discord to get the key (copied)",
+                Duration = 6
             })
 
         end
@@ -85,17 +128,18 @@ Tab:CreateButton({
     end
 })
 
-Tab:CreateButton({
-    Name = "Copy Discord",
+-- Copy Discord
+KeyTab:CreateButton({
+    Name = "Copy Discord Invite",
     Callback = function()
 
         pcall(function()
-            setclipboard(DISCORD)
+            setclipboard(Discord)
         end)
 
         Rayfield:Notify({
             Title = "Copied",
-            Content = "Discord copied",
+            Content = "Discord link copied to clipboard",
             Duration = 3
         })
 
