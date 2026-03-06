@@ -1,8 +1,8 @@
-name: TURKHUB Key Generator
+name: TURKHUB KEY SYSTEM
 
 on:
   schedule:
-    - cron: '40 19 * * *'   # 00:00 Thailand (UTC+7)
+    - cron: '*/5 * * * *'   # ทุก 5 นาที (TEST)
   workflow_dispatch:
 
 jobs:
@@ -14,19 +14,43 @@ jobs:
 
     steps:
 
-    - name: Checkout repo
+    - name: Checkout Repository
       uses: actions/checkout@v3
 
-    - name: Generate new key
+    - name: Generate Key
       run: |
-        KEY="TURKHUB-$(date +%s | sha256sum | head -c 6)"
+        KEY="TURKHUB-$(openssl rand -hex 3)"
         echo $KEY > KEY
-        echo "New key: $KEY"
+        echo "KEY=$KEY" >> $GITHUB_ENV
 
-    - name: Commit new key
+    - name: Commit Key
       run: |
         git config user.name "turkhub-bot"
         git config user.email "bot@github.com"
         git add KEY
-        git commit -m "Auto update key"
+        git commit -m "🔑 Test Key Update"
         git push
+
+    - name: Send Key To Discord
+      run: |
+        curl -H "Content-Type: application/json" \
+        -d '{
+        "content": "@everyone",
+        "embeds":[
+          {
+            "title":"🗝️ TURK HUB TEST KEY",
+            "description":"Test key auto system",
+            "color":5763719,
+            "fields":[
+              {
+                "name":"Key",
+                "value":"`'${{ env.KEY }}'`"
+              }
+            ],
+            "footer":{
+              "text":"TURK HUB KEY SYSTEM"
+            }
+          }
+        ]
+        }' \
+        https://discord.com/api/webhooks/1479462633383006373/p_GjlNQrYuQuZulcen9SxJExpZMF4oYdqQsMD235rYvmapsBTIQdhoHXlmrz0gzEkVLO
