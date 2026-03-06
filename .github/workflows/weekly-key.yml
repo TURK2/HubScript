@@ -31,5 +31,26 @@ jobs:
       - name: Send Key To Discord
         run: |
           curl -H "Content-Type: application/json" \
-          -d "{\"content\":\"@everyone\nKEYNEW 🗝️\nKey resets every day at 00:00 AM\n\nKey:\n\`\`\`${{ env.KEY }}\`\`\`\"}" \
+-d '{
+  "embeds": [{
+    "title": "🔑 New Key Generated",
+    "description": "Key ใหม่ถูกสร้างเรียบร้อย",
+    "color": 3066993,
+    "fields": [
+      {
+        "name": "Key",
+        "value": "KEY_HERE",
+        "inline": false
+      },
+      {
+        "name": "Time",
+        "value": "00:00 Generated",
+        "inline": true
+      }
+    ],
+    "footer": {
+      "text": "Auto Key System"
+    }
+  }]
+}' \
           https://discord.com/api/webhooks/1479462633383006373/p_GjlNQrYuQuZulcen9SxJExpZMF4oYdqQsMD235rYvmapsBTIQdhoHXlmrz0gzEkVLO
