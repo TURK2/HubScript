@@ -22,7 +22,7 @@ jobs:
         NOW=$(TZ="America/New_York" date +"%H:%M")
         echo "TIME=$NOW"
         
-        if [ "$NOW" = "16:11" ]; then
+        if [ "$NOW" = "16:14" ]; then
           echo "RUN=true" >> $GITHUB_ENV
         else
           echo "RUN=false" >> $GITHUB_ENV
