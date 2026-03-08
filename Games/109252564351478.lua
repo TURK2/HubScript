@@ -106,7 +106,7 @@ end
 ------------------------------------------------
 
 MainTab:CreateToggle({
-   Name = "Auto Farm Nivel21",
+   Name = "Auto Farm",
    CurrentValue = false,
    Callback = function(Value)
       AutoFarm = Value
@@ -143,7 +143,7 @@ MainTab:CreateToggle({
 ------------------------------------------------
 
 MainTH:CreateToggle({
-   Name = "ฟาร์มอัตโนมัติ Nivel21",
+   Name = "ฟาร์มอัตโนมัติ",
    CurrentValue = false,
    Callback = function(Value)
       AutoFarm = Value
