@@ -189,7 +189,7 @@ TabEN:CreateToggle({
 })
 
 TabEN:CreateToggle({
-	Name = "Auto Collect (Plot1-30)",
+	Name = "Auto Collect",
 	CurrentValue = false,
 	Callback = function(v)
 		AutoCollect = v
@@ -249,7 +249,7 @@ TabTH:CreateToggle({
 })
 
 TabTH:CreateToggle({
-	Name = "เก็บเงิน Plot1-30 ออโต้",
+	Name = "เก็บเงิน ออโต้",
 	CurrentValue = false,
 	Callback = function(v)
 		AutoCollect = v
@@ -281,7 +281,7 @@ TabTH:CreateToggle({
 })
 
 TabTH:CreateToggle({
-	Name = "ซื้อเบ็ด 1-17 ออโต้",
+	Name = "ซื้อเบ็ด ออโต้",
 	CurrentValue = false,
 	Callback = function(v)
 		AutoBuyRod = v
