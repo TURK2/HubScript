@@ -23,7 +23,7 @@ jobs:
         CURRENT=$(date -u +"%H:%M")
         echo "TIME=$CURRENT" >> $GITHUB_ENV
 
-        if [ "$CURRENT" = "20:00" ]; then
+        if [ "$CURRENT" = "20:03" ]; then
           echo "RUN=true" >> $GITHUB_ENV
         else
           echo "RUN=false" >> $GITHUB_ENV
