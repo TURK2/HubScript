@@ -12,7 +12,8 @@ local Window = Rayfield:CreateWindow({
    ConfigurationSaving = {Enabled = false}
 })
 
-local MainTab = Window:CreateTab("Main",4483362458)
+local MainTab = Window:CreateTab("Main EN",4483362458)
+local MainTH = Window:CreateTab("Main TH",4483362458)
 
 -- หา HRP
 local function getHRP()
@@ -29,16 +30,14 @@ local function getCF(obj)
     end
 end
 
--- AUTO FARM NIVEL21 + ขยับตัว
+------------------------------------------------
+-- AUTO FARM
+------------------------------------------------
+
 local AutoFarm = false
 
-MainTab:CreateToggle({
-   Name = "Auto Farm Nivel21",
-   CurrentValue = false,
-   Callback = function(Value)
-      AutoFarm = Value
-
-      task.spawn(function()
+local function StartFarm()
+    task.spawn(function()
         while AutoFarm do
 
             local entorno = workspace:FindFirstChild("Entorno")
@@ -52,29 +51,24 @@ MainTab:CreateToggle({
                         local hrp = getHRP()
                         hrp.CFrame = getCF(boton) + Vector3.new(0,3,0)
 
-                        -- ขยับตัวเล็กน้อย
                         hrp.CFrame = hrp.CFrame * CFrame.new(0,0,1)
                     end
                 end
             end
 
-            task.wait(0.5) -- วาร์ปทุก 0.5 วินาที
+            task.wait(0.5)
         end
-      end)
+    end)
+end
 
-   end
-})
-
+------------------------------------------------
 -- AUTO BUY
+------------------------------------------------
+
 local AutoBuy = false
 
-MainTab:CreateToggle({
-   Name = "Auto Buy Upgrade",
-   CurrentValue = false,
-   Callback = function(Value)
-      AutoBuy = Value
-
-      task.spawn(function()
+local function StartBuy()
+    task.spawn(function()
         while AutoBuy do
             local char = Player.Character or Player.CharacterAdded:Wait()
             local remote = char:WaitForChild("Eventos"):WaitForChild("Mejorar")
@@ -85,21 +79,17 @@ MainTab:CreateToggle({
 
             task.wait(0.5)
         end
-      end)
+    end)
+end
 
-   end
-})
-
+------------------------------------------------
 -- AUTO REBIRTH
+------------------------------------------------
+
 local AutoRebirth = false
 
-MainTab:CreateToggle({
-   Name = "Auto Rebirth",
-   CurrentValue = false,
-   Callback = function(Value)
-      AutoRebirth = Value
-
-      task.spawn(function()
+local function StartRebirth()
+    task.spawn(function()
         while AutoRebirth do
             local char = Player.Character or Player.CharacterAdded:Wait()
             local rebirth = char:WaitForChild("Eventos"):WaitForChild("Renacimiento")
@@ -108,7 +98,79 @@ MainTab:CreateToggle({
 
             task.wait(0.5)
         end
-      end)
+    end)
+end
 
+------------------------------------------------
+-- ENGLISH UI
+------------------------------------------------
+
+MainTab:CreateToggle({
+   Name = "Auto Farm Nivel21",
+   CurrentValue = false,
+   Callback = function(Value)
+      AutoFarm = Value
+      if Value then
+         StartFarm()
+      end
+   end
+})
+
+MainTab:CreateToggle({
+   Name = "Auto Buy Upgrade",
+   CurrentValue = false,
+   Callback = function(Value)
+      AutoBuy = Value
+      if Value then
+         StartBuy()
+      end
+   end
+})
+
+MainTab:CreateToggle({
+   Name = "Auto Rebirth",
+   CurrentValue = false,
+   Callback = function(Value)
+      AutoRebirth = Value
+      if Value then
+         StartRebirth()
+      end
+   end
+})
+
+------------------------------------------------
+-- THAI UI
+------------------------------------------------
+
+MainTH:CreateToggle({
+   Name = "ฟาร์มอัตโนมัติ Nivel21",
+   CurrentValue = false,
+   Callback = function(Value)
+      AutoFarm = Value
+      if Value then
+         StartFarm()
+      end
+   end
+})
+
+MainTH:CreateToggle({
+   Name = "ซื้ออัปเกรดอัตโนมัติ",
+   CurrentValue = false,
+   Callback = function(Value)
+      AutoBuy = Value
+      if Value then
+         StartBuy()
+      end
+   end
+})
+
+MainTH:CreateToggle({
+   Name = "รีเบิร์ดอัตโนมัติ",
+   CurrentValue = false,
+   Callback = function(Value)
+      AutoRebirth = Value
+      if Value then
+         StartRebirth()
+      end
    end
 })
