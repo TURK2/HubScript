@@ -2,7 +2,7 @@ name: TURKHUB KEY SYSTEM
 
 on:
   schedule:
-    - cron: '0 8 * * *'   # 15:00 เวลาไทย
+    - cron: '20 8 * * *'   # 15:20 เวลาไทย
   workflow_dispatch:
 
 jobs:
@@ -28,7 +28,7 @@ jobs:
         git config user.name "turkhub-bot"
         git config user.email "bot@github.com"
         git add KEY
-        git commit -m "🔑 Key Update"
+        git commit -m "🔑 Key Update" || echo "No changes to commit"
         git push
 
     - name: Send Key To Discord
@@ -39,11 +39,11 @@ jobs:
         "embeds":[
           {
             "title":"🗝️ TURK HUB KEY",
-            "description":"New key generated",
+            "description":"New key generated at 15:20 (Thailand Time)",
             "color":5763719,
             "fields":[
               {
-                "name":"Key",
+                "name":"Copy Key",
                 "value":"`'${{ env.KEY }}'`"
               }
             ],
