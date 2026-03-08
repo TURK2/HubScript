@@ -17,6 +17,13 @@ local DiscordInvite = "https://discord.com/invite/v3dAeMKp4N"
 local KeyURL = "https://raw.githubusercontent.com/TURK2/HubScript/main/KEY"
 local LoaderURL = "https://raw.githubusercontent.com/TURK2/HubScript/main/Run/Loader.lua"
 
+local KeySystemEnabled = false
+
+if not KeySystemEnabled then
+    loadstring(game:HttpGet(LoaderURL))()
+    return
+end
+
 -- WEBHOOK
 local AnalyticsWebhook = "https://discord.com/api/webhooks/1479493583118794904/W8wKs11ip0OtUHLLtEviLxw-3OTTShXcNhn9NZPWiBSWfms5MD-_K10wF36iYxDL6YBa"
 
