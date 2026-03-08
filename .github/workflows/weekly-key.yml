@@ -35,5 +35,5 @@ jobs:
           WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}  # ย้าย URL มาที่ Repository Secrets ชื่อ DISCORD_WEBHOOK
         run: |
           curl -H "Content-Type: application/json" \
-            -d "{\"content\":\"@everyone **Key ใหม่วันนี้** : \`${{ env.KEY }}\` \nเวลา: $(date '+%H:%M %Z')\"}" \
+            -d "{\"content\":\"@everyone **Key** : \`${{ env.KEY }}\` \n time: $(date '+%H:%M %Z')\"}" \
             "$WEBHOOK" || echo "Discord send failed"
