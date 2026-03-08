@@ -2,7 +2,7 @@ name: TURKHUB KEY SYSTEM
 
 on:
   schedule:
-    - cron: '20 15 * * *'          # 22:05 Asia/Bangkok = 15:05 UTC
+    - cron: '30 17 * * *'   # 00:30 Thailand
   workflow_dispatch:
 
 jobs:
