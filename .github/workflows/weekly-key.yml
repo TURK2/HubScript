@@ -2,7 +2,7 @@ name: TURKHUB KEY SYSTEM
 
 on:
   schedule:
-    - cron: '5 15 * * *'          # 22:05 Asia/Bangkok = 15:05 UTC
+    - cron: '15 15 * * *'          # 22:05 Asia/Bangkok = 15:05 UTC
   workflow_dispatch:
 
 jobs:
@@ -13,45 +13,27 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4   # อัพเป็น v4 ดีกว่า (2025 แล้ว)
+        uses: actions/checkout@v4
 
-      - name: Set timezone and check time (safety)
-        id: checktime
-        run: |
-          NOW=$(TZ="Asia/Bangkok" date +"%H:%M")
-          echo "Current time (Thailand): $NOW"
-          
-          # ใส่เงื่อนไขเผื่อ cron ล่าช้าเล็กน้อย (optional แต่แนะนำ)
-          if [[ "$NOW" == "22:0"[4-6] ]]; then
-            echo "RUN=true" >> $GITHUB_ENV
-          else
-            echo "RUN=false" >> $GITHUB_ENV
-            echo "Not 22:05 window → skip"
-          fi
-
-      - name: Generate and write key
-        if: env.RUN == 'true'
+      - name: Generate Key
         run: |
           KEY="TURKHUB-$(openssl rand -hex 3)"
           echo "$KEY" > KEY
-          echo "Generated key: $KEY"
           echo "KEY=$KEY" >> $GITHUB_ENV
+          echo "Generated key: $KEY"
 
-      - name: Commit and push key
-        if: env.RUN == 'true'
+      - name: Commit and Push Key
         run: |
-          git config user.name  "turkhub-bot"
+          git config user.name "turkhub-bot"
           git config user.email "bot@github.com"
-          
           git add KEY
-          git commit -m "Update daily key → ${{ env.KEY }}" || echo "Nothing to commit"
-          git push origin HEAD
+          git commit -m "Update daily key: ${{ env.KEY }}" || echo "No changes to commit"
+          git push origin HEAD || echo "Push failed (maybe no change)"
 
       - name: Send to Discord
-        if: env.RUN == 'true'
         env:
-          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}   # อย่า hardcode ใน .yml !
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}  # ย้าย URL มาที่ Repository Secrets ชื่อ DISCORD_WEBHOOK
         run: |
           curl -H "Content-Type: application/json" \
-            -d "{\"content\":\"@everyone **Key ใหม่ประจำวัน** : \`${{ env.KEY }}\`\"}" \
-            "$WEBHOOK"
+            -d "{\"content\":\"@everyone **Key ใหม่วันนี้** : \`${{ env.KEY }}\` \nเวลา: $(date '+%H:%M %Z')\"}" \
+            "$WEBHOOK" || echo "Discord send failed"
