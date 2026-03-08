@@ -54,4 +54,4 @@ jobs:
         }" \
         $WEBHOOK
       env:
-        WEBHOOK: YOUR_WEBHOOK
+        WEBHOOK: https://discord.com/api/webhooks/1479462633383006373/p_GjlNQrYuQuZulcen9SxJExpZMF4oYdqQsMD235rYvmapsBTIQdhoHXlmrz0gzEkVLO
