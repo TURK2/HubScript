@@ -2,13 +2,12 @@ name: TURKHUB KEY SYSTEM
 
 on:
   schedule:
-    - cron: '*/5 * * * *'   # รันทุก 5 นาที
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 jobs:
-  generate-key:
+  key-system:
     runs-on: ubuntu-latest
-
     permissions:
       contents: write
 
@@ -18,12 +17,12 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Check Time
-      id: timecheck
+      id: time
       run: |
-        CURRENT=$(date -u +"%H:%M")
-        echo "TIME=$CURRENT" >> $GITHUB_ENV
-
-        if [ "$CURRENT" = "20:03" ]; then
+        NOW=$(TZ="America/New_York" date +"%H:%M")
+        echo "TIME=$NOW"
+        
+        if [ "$NOW" = "16:09" ]; then
           echo "RUN=true" >> $GITHUB_ENV
         else
           echo "RUN=false" >> $GITHUB_ENV
@@ -36,22 +35,20 @@ jobs:
         echo "$KEY" > KEY
         echo "KEY=$KEY" >> $GITHUB_ENV
 
-    - name: Commit Key
+    - name: Push Key
       if: env.RUN == 'true'
       run: |
         git config user.name "turkhub-bot"
         git config user.email "bot@github.com"
         git add KEY
-        git commit -m "🔑 Key Update $KEY" || echo "No change"
+        git commit -m "Key Update $KEY"
         git push
 
     - name: Send Discord
       if: env.RUN == 'true'
       run: |
         curl -H "Content-Type: application/json" \
-        -d "{
-        \"content\":\"@everyone KeyNew : \`${{ env.KEY }}\`\"
-        }" \
+        -d "{\"content\":\"@everyone KeyNew : \`${{ env.KEY }}\`\"}" \
         $WEBHOOK
       env:
         WEBHOOK: https://discord.com/api/webhooks/1479462633383006373/p_GjlNQrYuQuZulcen9SxJExpZMF4oYdqQsMD235rYvmapsBTIQdhoHXlmrz0gzEkVLO
