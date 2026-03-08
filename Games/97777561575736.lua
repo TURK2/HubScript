@@ -20,8 +20,11 @@ local Window = Rayfield:CreateWindow({
 })
 
 -- Tabs
-local MainTab = Window:CreateTab("Main",4483362458)
-local SettingsTab = Window:CreateTab("Settings",4483362458)
+local MainTab = Window:CreateTab("Main EN",4483362458)
+local MainTH = Window:CreateTab("Main TH",4483362458)
+
+local SettingsTab = Window:CreateTab("Settings EN",4483362458)
+local SettingsTH = Window:CreateTab("Settings TH",4483362458)
 
 -- Remote
 local Reliable = ReplicatedStorage:WaitForChild("Warp"):WaitForChild("Index"):WaitForChild("Event"):WaitForChild("Reliable")
@@ -66,7 +69,7 @@ local function WarpToPosition(pos)
 end
 
 -- =========================
--- UI
+-- UI EN
 -- =========================
 
 MainTab:CreateToggle({
@@ -95,6 +98,44 @@ MainTab:CreateToggle({
 
 SettingsTab:CreateSlider({
    Name = "Warp Speed",
+   Range = {0,1},
+   Increment = 0.05,
+   CurrentValue = 0.1,
+   Callback = function(Value)
+      SpeedWarp = Value
+   end
+})
+
+-- =========================
+-- UI TH
+-- =========================
+
+MainTH:CreateToggle({
+   Name = "ฟาร์ม Reliable อัตโนมัติ",
+   CurrentValue = false,
+   Callback = function(Value)
+      AutoReliable = Value
+   end
+})
+
+MainTH:CreateToggle({
+   Name = "วินอัตโนมัติ",
+   CurrentValue = false,
+   Callback = function(Value)
+      AutoWin = Value
+   end
+})
+
+MainTH:CreateToggle({
+   Name = "รีเบิร์ดอัตโนมัติ",
+   CurrentValue = false,
+   Callback = function(Value)
+      AutoRebirth = Value
+   end
+})
+
+SettingsTH:CreateSlider({
+   Name = "ความเร็ววาร์ป",
    Range = {0,1},
    Increment = 0.05,
    CurrentValue = 0.1,
