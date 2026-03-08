@@ -11,8 +11,8 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
--- Main Tab
-local MainTab = Window:CreateTab("Main", 4483362458)
+-- MAIN EN
+local MainTab = Window:CreateTab("Main EN", 4483362458)
 
 MainTab:CreateButton({
    Name = "Spawn LuckyBlock",
@@ -49,7 +49,45 @@ MainTab:CreateButton({
    end,
 })
 
--- About Tab
+-- MAIN TH
+local MainTH = Window:CreateTab("Main TH", 4483362458)
+
+MainTH:CreateButton({
+   Name = "สุ่ม LuckyBlock",
+   Callback = function()
+      ReplicatedStorage.SpawnLuckyBlock:FireServer()
+   end,
+})
+
+MainTH:CreateButton({
+   Name = "สุ่ม Super Block",
+   Callback = function()
+      ReplicatedStorage.SpawnSuperBlock:FireServer()
+   end,
+})
+
+MainTH:CreateButton({
+   Name = "สุ่ม Diamond Block",
+   Callback = function()
+      ReplicatedStorage.SpawnDiamondBlock:FireServer()
+   end,
+})
+
+MainTH:CreateButton({
+   Name = "สุ่ม Rainbow Block",
+   Callback = function()
+      ReplicatedStorage.SpawnRainbowBlock:FireServer()
+   end,
+})
+
+MainTH:CreateButton({
+   Name = "สุ่ม Galaxy Block",
+   Callback = function()
+      ReplicatedStorage.SpawnGalaxyBlock:FireServer()
+   end,
+})
+
+-- ABOUT
 local AboutTab = Window:CreateTab("About", 4483362458)
 
 AboutTab:CreateParagraph({
