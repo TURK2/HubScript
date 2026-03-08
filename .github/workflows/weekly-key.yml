@@ -2,7 +2,7 @@ name: TURKHUB KEY SYSTEM
 
 on:
   schedule:
-    - cron: '52 19 * * *'   # 03:50 PM US Eastern Time
+    - cron: '*/5 * * * *'   # รันทุก 5 นาที
   workflow_dispatch:
 
 jobs:
@@ -14,43 +14,44 @@ jobs:
 
     steps:
 
-    - name: Checkout Repository
+    - name: Checkout
       uses: actions/checkout@v3
-      with:
-        persist-credentials: true
+
+    - name: Check Time
+      id: timecheck
+      run: |
+        CURRENT=$(date -u +"%H:%M")
+        echo "TIME=$CURRENT" >> $GITHUB_ENV
+
+        if [ "$CURRENT" = "20:00" ]; then
+          echo "RUN=true" >> $GITHUB_ENV
+        else
+          echo "RUN=false" >> $GITHUB_ENV
+        fi
 
     - name: Generate Key
+      if: env.RUN == 'true'
       run: |
         KEY="TURKHUB-$(openssl rand -hex 3)"
         echo "$KEY" > KEY
         echo "KEY=$KEY" >> $GITHUB_ENV
 
     - name: Commit Key
+      if: env.RUN == 'true'
       run: |
         git config user.name "turkhub-bot"
         git config user.email "bot@github.com"
         git add KEY
-        git commit -m "🔑 Key Update: $KEY" || echo "No changes"
+        git commit -m "🔑 Key Update $KEY" || echo "No change"
         git push
 
-    - name: Send Key To Discord
+    - name: Send Discord
+      if: env.RUN == 'true'
       run: |
-        curl -X POST "$WEBHOOK" \
-        -H "Content-Type: application/json" \
+        curl -H "Content-Type: application/json" \
         -d "{
-          \"content\": \"@everyone KeyNew : \`${{ env.KEY }}\`\",
-          \"embeds\": [{
-            \"title\": \"🗝️ TURK HUB KEY\",
-            \"description\": \"New key generated at 03:50 PM (US Time)\",
-            \"color\": 5763719,
-            \"fields\": [{
-              \"name\": \"Copy Key\",
-              \"value\": \"\`${{ env.KEY }}\`\"
-            }],
-            \"footer\": {
-              \"text\": \"TURK HUB KEY SYSTEM\"
-            }
-          }]
-        }"
+        \"content\":\"@everyone KeyNew : \`${{ env.KEY }}\`\"
+        }" \
+        $WEBHOOK
       env:
-        WEBHOOK: https://discord.com/api/webhooks/1479462633383006373/p_GjlNQrYuQuZulcen9SxJExpZMF4oYdqQsMD235rYvmapsBTIQdhoHXlmrz0gzEkVLO
+        WEBHOOK: YOUR_WEBHOOK
