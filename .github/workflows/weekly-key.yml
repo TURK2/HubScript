@@ -2,7 +2,7 @@ name: TURKHUB KEY SYSTEM
 
 on:
   schedule:
-    - cron: '*/1 * * * *'
+    - cron: '5 15 * * *'          # 22:05 Asia/Bangkok = 15:05 UTC
   workflow_dispatch:
 
 jobs:
@@ -12,43 +12,46 @@ jobs:
       contents: write
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4   # อัพเป็น v4 ดีกว่า (2025 แล้ว)
 
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Set timezone and check time (safety)
+        id: checktime
+        run: |
+          NOW=$(TZ="Asia/Bangkok" date +"%H:%M")
+          echo "Current time (Thailand): $NOW"
+          
+          # ใส่เงื่อนไขเผื่อ cron ล่าช้าเล็กน้อย (optional แต่แนะนำ)
+          if [[ "$NOW" == "22:0"[4-6] ]]; then
+            echo "RUN=true" >> $GITHUB_ENV
+          else
+            echo "RUN=false" >> $GITHUB_ENV
+            echo "Not 22:05 window → skip"
+          fi
 
-    - name: Check Time
-      id: time
-      run: |
-        NOW=$(TZ="America/New_York" date +"%H:%M")
-        echo "TIME=$NOW"
-        
-        if [ "$NOW" = "16:14" ]; then
-          echo "RUN=true" >> $GITHUB_ENV
-        else
-          echo "RUN=false" >> $GITHUB_ENV
-        fi
+      - name: Generate and write key
+        if: env.RUN == 'true'
+        run: |
+          KEY="TURKHUB-$(openssl rand -hex 3)"
+          echo "$KEY" > KEY
+          echo "Generated key: $KEY"
+          echo "KEY=$KEY" >> $GITHUB_ENV
 
-    - name: Generate Key
-      if: env.RUN == 'true'
-      run: |
-        KEY="TURKHUB-$(openssl rand -hex 3)"
-        echo "$KEY" > KEY
-        echo "KEY=$KEY" >> $GITHUB_ENV
+      - name: Commit and push key
+        if: env.RUN == 'true'
+        run: |
+          git config user.name  "turkhub-bot"
+          git config user.email "bot@github.com"
+          
+          git add KEY
+          git commit -m "Update daily key → ${{ env.KEY }}" || echo "Nothing to commit"
+          git push origin HEAD
 
-    - name: Push Key
-      if: env.RUN == 'true'
-      run: |
-        git config user.name "turkhub-bot"
-        git config user.email "bot@github.com"
-        git add KEY
-        git commit -m "Key Update $KEY"
-        git push
-
-    - name: Send Discord
-      if: env.RUN == 'true'
-      run: |
-        curl -H "Content-Type: application/json" \
-        -d "{\"content\":\"@everyone KeyNew : \`${{ env.KEY }}\`\"}" \
-        $WEBHOOK
-      env:
-        WEBHOOK: https://discord.com/api/webhooks/1479462633383006373/p_GjlNQrYuQuZulcen9SxJExpZMF4oYdqQsMD235rYvmapsBTIQdhoHXlmrz0gzEkVLO
+      - name: Send to Discord
+        if: env.RUN == 'true'
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}   # อย่า hardcode ใน .yml !
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d "{\"content\":\"@everyone **Key ใหม่ประจำวัน** : \`${{ env.KEY }}\`\"}" \
+            "$WEBHOOK"
