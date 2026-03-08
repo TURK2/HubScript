@@ -29,30 +29,17 @@ local Reliable = ReplicatedStorage:WaitForChild("Warp"):WaitForChild("Index"):Wa
 -- Variables
 local AutoReliable = false
 local AutoWin = false
+local AutoRebirth = false
+
 local CurrentStage = 1
 local MaxStage = 18
 local SpeedWarp = 0.1
 
 local TargetPosition = Vector3.new(119.26,5.63,-18.36)
 
--- Buffers
-local Buffers = {
-"\254\002\000\006\005Power\001\001",
-"\254\002\000\006\005Power\001\002",
-"\254\002\000\006\005Power\001\003",
-"\254\002\000\006\005Power\001\004",
-"\254\002\000\006\005Power\001\005",
-"\254\002\000\006\005Power\001\006",
-"\254\002\000\006\005Power\001\007",
-"\254\002\000\006\005Power\001\008",
-"\254\002\000\006\005Power\001\009",
-"\254\002\000\006\005Power\001\0010",
-"\254\002\000\006\005Power\001\0011",
-"\254\002\000\006\005Power\001\0012",
-
-}
-
+-- =========================
 -- Functions
+-- =========================
 
 local function WarpToSign(stage)
     local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
@@ -79,7 +66,7 @@ local function WarpToPosition(pos)
 end
 
 -- =========================
--- UI TOGGLES
+-- UI
 -- =========================
 
 MainTab:CreateToggle({
@@ -95,6 +82,14 @@ MainTab:CreateToggle({
    CurrentValue = false,
    Callback = function(Value)
       AutoWin = Value
+   end
+})
+
+MainTab:CreateToggle({
+   Name = "Auto Rebirth",
+   CurrentValue = false,
+   Callback = function(Value)
+      AutoRebirth = Value
    end
 })
 
@@ -117,14 +112,46 @@ while true do
 task.wait()
 
 if AutoReliable then
-    for _,buf in ipairs(Buffers) do
-        pcall(function()
-            Reliable:FireServer(
-                buffer.fromstring("\27"),
-                buffer.fromstring(buf)
-            )
-        end)
-    end
+
+for i = 1,12 do
+
+local args = {
+buffer.fromstring("\029"),
+buffer.fromstring("\254\002\000\006\005Power\001"..string.char(i))
+}
+
+pcall(function()
+Reliable:FireServer(unpack(args))
+end)
+
+end
+
+end
+
+end
+end)
+
+-- =========================
+-- AUTO REBIRTH LOOP
+-- =========================
+
+task.spawn(function()
+while true do
+task.wait(0.5)
+
+if AutoRebirth then
+
+pcall(function()
+
+local args = {
+buffer.fromstring("\002"),
+buffer.fromstring("\254\000\000")
+}
+
+Reliable:FireServer(unpack(args))
+
+end)
+
 end
 
 end
