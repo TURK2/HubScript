@@ -7,14 +7,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- toggles
 local AutoReel = false
 local AutoCollect = false
-local AutoRodMutation = false
-local AutoSell = false
 local AutoPower = false
 local AutoCatch = false
+local AutoRodMutation = false
 local AutoBuyRod = false
 local AutoRebirth = false
+local AutoSell = false
 
--- speed
 local CollectSpeed = 0.2
 
 local DeleteSetting = {
@@ -29,19 +28,21 @@ local DeleteSetting = {
 }
 
 -------------------------------------------------
+-- UI
+-------------------------------------------------
 
 local Window = Rayfield:CreateWindow({
     Name = "Fishing Hub",
-    LoadingTitle = "Auto Farm",
-    LoadingSubtitle = "Script",
+    LoadingTitle = "Fishing Script",
+    LoadingSubtitle = "Auto Farm",
     ConfigurationSaving = {Enabled = false}
 })
 
-local TabEN = Window:CreateTab("Main EN",4483362458)
-local TabTH = Window:CreateTab("Main TH",4483362458)
+local Main = Window:CreateTab("Main",4483362458)
+local SellTab = Window:CreateTab("Sell Setting",4483362458)
 
 -------------------------------------------------
--- Auto Reel
+-- AUTO REEL
 -------------------------------------------------
 
 task.spawn(function()
@@ -54,35 +55,37 @@ task.spawn(function()
 end)
 
 -------------------------------------------------
--- Auto Collect (1 -> 2 -> 3 -> ...)
+-- AUTO COLLECT (FIX)
 -------------------------------------------------
 
 task.spawn(function()
 
-    local PlotIndex = 1
+    local plot = 1
 
     while true do
 
         if AutoCollect then
 
-            ReplicatedStorage.RemoteHandler.Collect:FireServer("Plot"..PlotIndex)
+            ReplicatedStorage.RemoteHandler.Collect:FireServer("Plot"..plot)
 
-            PlotIndex = PlotIndex + 1
+            plot += 1
 
-            if PlotIndex > 30 then
-                PlotIndex = 1
+            if plot > 30 then
+                plot = 1
             end
 
-        end
+            task.wait(CollectSpeed)
 
-        task.wait(CollectSpeed)
+        else
+            task.wait(0.2)
+        end
 
     end
 
 end)
 
 -------------------------------------------------
--- Auto Power
+-- AUTO POWER
 -------------------------------------------------
 
 task.spawn(function()
@@ -95,7 +98,7 @@ task.spawn(function()
 end)
 
 -------------------------------------------------
--- Auto Catch
+-- AUTO CATCH
 -------------------------------------------------
 
 task.spawn(function()
@@ -108,7 +111,7 @@ task.spawn(function()
 end)
 
 -------------------------------------------------
--- Auto Rod Mutation
+-- AUTO ROD MUTATION
 -------------------------------------------------
 
 task.spawn(function()
@@ -124,7 +127,7 @@ task.spawn(function()
 end)
 
 -------------------------------------------------
--- Auto Buy Rod
+-- AUTO BUY ROD
 -------------------------------------------------
 
 task.spawn(function()
@@ -140,7 +143,7 @@ task.spawn(function()
 end)
 
 -------------------------------------------------
--- Auto Rebirth
+-- AUTO REBIRTH
 -------------------------------------------------
 
 task.spawn(function()
@@ -153,7 +156,7 @@ task.spawn(function()
 end)
 
 -------------------------------------------------
--- Auto Sell
+-- AUTO SELL
 -------------------------------------------------
 
 task.spawn(function()
@@ -166,54 +169,20 @@ task.spawn(function()
 end)
 
 -------------------------------------------------
--- EN UI
+-- UI MAIN
 -------------------------------------------------
 
-TabEN:CreateDropdown({
-    Name = "Fish To Delete",
-    Options = {"Uncommon","Rare","Epic","Legendary","Mythic","Godly","Divine","Secret"},
-    CurrentOption = {},
-    MultipleOptions = true,
-    Callback = function(options)
-
-        for k in pairs(DeleteSetting) do
-            DeleteSetting[k] = false
-        end
-
-        for _,v in pairs(options) do
-            DeleteSetting[v] = true
-        end
-
-    end
-})
-
-TabEN:CreateSlider({
+Main:CreateSlider({
     Name = "Collect Speed",
     Range = {0.05,1},
     Increment = 0.05,
     CurrentValue = 0.2,
-    Callback = function(Value)
-        CollectSpeed = Value
-    end
-})
-
-TabEN:CreateToggle({
-    Name = "Auto Sell Selected Fish",
-    CurrentValue = false,
     Callback = function(v)
-        AutoSell = v
+        CollectSpeed = v
     end
 })
 
-TabEN:CreateToggle({
-    Name = "Auto Reel",
-    CurrentValue = false,
-    Callback = function(v)
-        AutoReel = v
-    end
-})
-
-TabEN:CreateToggle({
+Main:CreateToggle({
     Name = "Auto Collect",
     CurrentValue = false,
     Callback = function(v)
@@ -221,7 +190,15 @@ TabEN:CreateToggle({
     end
 })
 
-TabEN:CreateToggle({
+Main:CreateToggle({
+    Name = "Auto Reel",
+    CurrentValue = false,
+    Callback = function(v)
+        AutoReel = v
+    end
+})
+
+Main:CreateToggle({
     Name = "Auto Buy Power",
     CurrentValue = false,
     Callback = function(v)
@@ -229,7 +206,7 @@ TabEN:CreateToggle({
     end
 })
 
-TabEN:CreateToggle({
+Main:CreateToggle({
     Name = "Auto Buy Catch",
     CurrentValue = false,
     Callback = function(v)
@@ -237,23 +214,23 @@ TabEN:CreateToggle({
     end
 })
 
-TabEN:CreateToggle({
-    Name = "Auto Buy RodMutation",
+Main:CreateToggle({
+    Name = "Auto Rod Mutation",
     CurrentValue = false,
     Callback = function(v)
         AutoRodMutation = v
     end
 })
 
-TabEN:CreateToggle({
-    Name = "Auto Buy FishingRod",
+Main:CreateToggle({
+    Name = "Auto Buy Rod",
     CurrentValue = false,
     Callback = function(v)
         AutoBuyRod = v
     end
 })
 
-TabEN:CreateToggle({
+Main:CreateToggle({
     Name = "Auto Rebirth",
     CurrentValue = false,
     Callback = function(v)
@@ -261,80 +238,26 @@ TabEN:CreateToggle({
     end
 })
 
--------------------------------------------------
--- TH UI
--------------------------------------------------
-
-TabTH:CreateSlider({
-    Name = "ความเร็วเก็บเงิน",
-    Range = {0.05,1},
-    Increment = 0.05,
-    CurrentValue = 0.2,
-    Callback = function(Value)
-        CollectSpeed = Value
-    end
-})
-
-TabTH:CreateToggle({
-    Name = "รีลปลาอัตโนมัติ",
-    CurrentValue = false,
-    Callback = function(v)
-        AutoReel = v
-    end
-})
-
-TabTH:CreateToggle({
-    Name = "เก็บเงิน ออโต้",
-    CurrentValue = false,
-    Callback = function(v)
-        AutoCollect = v
-    end
-})
-
-TabTH:CreateToggle({
-    Name = "ซื้อ Power อัตโนมัติ",
-    CurrentValue = false,
-    Callback = function(v)
-        AutoPower = v
-    end
-})
-
-TabTH:CreateToggle({
-    Name = "ซื้อ Catch อัตโนมัติ",
-    CurrentValue = false,
-    Callback = function(v)
-        AutoCatch = v
-    end
-})
-
-TabTH:CreateToggle({
-    Name = "ซื้อ Mutation เบ็ด",
-    CurrentValue = false,
-    Callback = function(v)
-        AutoRodMutation = v
-    end
-})
-
-TabTH:CreateToggle({
-    Name = "ซื้อเบ็ด ออโต้",
-    CurrentValue = false,
-    Callback = function(v)
-        AutoBuyRod = v
-    end
-})
-
-TabTH:CreateToggle({
-    Name = "รีเบิร์ดอัตโนมัติ",
-    CurrentValue = false,
-    Callback = function(v)
-        AutoRebirth = v
-    end
-})
-
-TabTH:CreateToggle({
-    Name = "ขายปลาอัตโนมัติ",
+Main:CreateToggle({
+    Name = "Auto Sell",
     CurrentValue = false,
     Callback = function(v)
         AutoSell = v
     end
 })
+
+-------------------------------------------------
+-- SELL SETTING
+-------------------------------------------------
+
+for rarity,_ in pairs(DeleteSetting) do
+
+    SellTab:CreateToggle({
+        Name = "Sell "..rarity,
+        CurrentValue = false,
+        Callback = function(v)
+            DeleteSetting[rarity] = v
+        end
+    })
+
+end
