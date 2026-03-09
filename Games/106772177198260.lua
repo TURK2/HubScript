@@ -1,4 +1,3 @@
-สคริปหลักใส่อันนี้ได้ไหม 
 repeat task.wait() until game:IsLoaded()
 
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
