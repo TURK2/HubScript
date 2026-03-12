@@ -21,25 +21,22 @@ local AutoCollect = false
 local PlayerPlot = nil
 
 -------------------------------------------------
--- HOLD E (1 วิ × 3 ครั้ง)
+-- HOLD E
 -------------------------------------------------
 
 local function HoldE()
 
 for i = 1,3 do
-
 VIM:SendKeyEvent(true,"E",false,game)
 task.wait(1)
 VIM:SendKeyEvent(false,"E",false,game)
-
 task.wait(0.15)
-
 end
 
 end
 
 -------------------------------------------------
--- FIND PLAYER PLOT
+-- FIND PLOT
 -------------------------------------------------
 
 local function FindPlot()
@@ -50,7 +47,6 @@ local owner = plot:FindFirstChild("OwnerName")
 
 if owner and tostring(owner.Value) == player.Name then
 PlayerPlot = plot
-print("Found Plot:",plot.Name)
 return
 end
 
@@ -58,34 +54,8 @@ local attr = plot:GetAttribute("OwnerName")
 
 if attr and attr == player.Name then
 PlayerPlot = plot
-print("Found Plot:",plot.Name)
 return
 end
-
-end
-
-warn("Plot Not Found")
-
-end
-
--------------------------------------------------
--- TELEPORT PLOT
--------------------------------------------------
-
-local function TeleportPlot()
-
-if not PlayerPlot then
-FindPlot()
-end
-
-if PlayerPlot then
-
-local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-local pos = PlayerPlot:GetPivot().Position
-
-hrp.CFrame = CFrame.new(pos + Vector3.new(0,5,0))
-
-print("Teleported To Player Plot")
 
 end
 
@@ -106,10 +76,7 @@ local part = zone:FindFirstChild("Part")
 if part then
 
 local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-
 hrp.CFrame = part.CFrame + Vector3.new(0,5,0)
-
-print("Teleport Zone:",num)
 
 end
 
@@ -139,7 +106,6 @@ if rarity then
 local text = string.upper(rarity.Text)
 
 if text == "MYTHIC" or text == "SECRET" then
-print("⭐ FOUND:",text,model.Name)
 return model
 end
 
@@ -172,14 +138,9 @@ local part = rare:FindFirstChildWhichIsA("BasePart")
 if part then
 
 local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-
 hrp.CFrame = part.CFrame + Vector3.new(0,3,0)
 
-print("Collecting Rare")
-
 HoldE()
-
-TeleportPlot()
 
 end
 
@@ -194,7 +155,10 @@ TeleportZone(i)
 task.wait(0.8)
 
 local rareCheck = FindRare()
-if rareCheck then break end
+
+if rareCheck then
+break
+end
 
 end
 
@@ -250,7 +214,7 @@ end
 end)
 
 -------------------------------------------------
--- AUTO UPGRADE PODS
+-- AUTO UPGRADE
 -------------------------------------------------
 
 task.spawn(function()
@@ -329,17 +293,26 @@ LoadingTitle = "Brainrot Script",
 LoadingSubtitle = "Complete Version"
 })
 
--------------------------------------------------
--- MAIN TAB
--------------------------------------------------
-
 local MainTab = Window:CreateTab("Main",4483362458)
+
+-------------------------------------------------
+-- MAIN MENU
+-------------------------------------------------
 
 MainTab:CreateToggle({
 Name = "Auto Farm MYTHIC / SECRET",
 CurrentValue = false,
 Callback = function(v)
+
 AutoFarm = v
+
+if not v then
+local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+if hum then
+hum.Health = 0
+end
+end
+
 end
 })
 
