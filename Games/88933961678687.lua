@@ -19,7 +19,7 @@ task.spawn(function() while true do if _G.W and hrp then hrp.CFrame = CFrame.new
 task.spawn(function() while true do if _G.R then Rebirth:FireServer("free") end task.wait(1) end end)
 
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
-local W = Rayfield:CreateWindow({Name="Math.Huge"})
+local W = Rayfield:CreateWindow({Name="Hyper Speed Runner"})
 local T = W:CreateTab("Farm")
 
 T:CreateToggle({Name="Auto Step",Callback=function(v)_G.S=v end})
