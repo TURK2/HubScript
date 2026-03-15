@@ -24,5 +24,5 @@ local T = W:CreateTab("Farm")
 
 T:CreateToggle({Name="Auto Step",Callback=function(v)_G.S=v end})
 T:CreateSlider({Name="Steps Per Loop",Range={1,50},Increment=1,CurrentValue=1,Callback=function(v)_G.N=v end})
-T:CreateToggle({Name="Auto Warp",Callback=function(v)_G.W=v end})
+T:CreateToggle({Name="Auto Win",Callback=function(v)_G.W=v end})
 T:CreateToggle({Name="Auto Rebirth (1s)",Callback=function(v)_G.R=v end})
