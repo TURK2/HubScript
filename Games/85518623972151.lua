@@ -135,7 +135,7 @@ end)
 
 -- UI
 local Ray = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
-local W = Ray:CreateWindow({Name="",LoadingTitle="Script",LoadingSubtitle="Lite",ConfigurationSaving={Enabled=false}})
+local W = Ray:CreateWindow({Name="",LoadingTitle="Script",LoadingSubtitle="+1 Speed +1 Jump for Brainrots",ConfigurationSaving={Enabled=false}})
 local T = W:CreateTab("Main",4483362458)
 
 T:CreateInput({
@@ -146,7 +146,7 @@ T:CreateInput({
 
 for k,_ in pairs(Tog) do
     T:CreateToggle({
-        Name="+1 Speed +1 Jump for Brainrots"..k,
+        Name="Auto"..k,
         Callback=function(v) Tog[k]=v end
     })
 end
