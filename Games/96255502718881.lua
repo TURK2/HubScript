@@ -61,7 +61,7 @@ local function fire()
 	:FireServer(unpack(args))
 end
 
--- 🔒 AutoLock (FIX จริง: เฉพาะ "1s" เท่านั้น)
+-- 🔒 AutoLock (วาปไป-กลับ 100%)
 task.spawn(function()
 	while task.wait(0.2) do
 		if getgenv().AutoLock then
@@ -73,15 +73,29 @@ task.spawn(function()
 					local txt=""
 					pcall(function() txt=btn.Info.Timer.Text end)
 
-					-- ✅ ตรงเป๊ะเท่านั้น
+					txt=tostring(txt):gsub("%s+","")
+
 					if txt=="1s" or txt=="" then
-						local hrp=plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
+						local char=plr.Character
+						local hrp=char and char:FindFirstChild("HumanoidRootPart")
+
 						if hrp and part then
 							local old=hrp.CFrame
+
+							-- วาปไป
 							hrp.CFrame=part.CFrame+Vector3.new(0,2,0)
+							task.wait(0.1)
+
+							-- กด
 							firetouchinterest(hrp,part,0)
 							firetouchinterest(hrp,part,1)
-							hrp.CFrame=old
+
+							task.wait(0.05)
+
+							-- วาปกลับชัวร์
+							if hrp then
+								hrp.CFrame=old
+							end
 						end
 					end
 				end
@@ -166,7 +180,7 @@ auto:CreateInput({
 
 auto:CreateToggle({Name="🧠 Auto Collect",Callback=function(v)getgenv().AutoBrainrots=v end})
 auto:CreateToggle({Name="🛒 Auto Buy",Callback=function(v)getgenv().AutoBuy=v end})
-auto:CreateToggle({Name="🔒 Auto Lock (1s เท่านั้น)",Callback=function(v)getgenv().AutoLock=v end})
+auto:CreateToggle({Name="🔒 Auto Lock (วาปไป-กลับ)",Callback=function(v)getgenv().AutoLock=v end})
 
 auto:CreateButton({Name="🗑️ ลบ Gate+Plot",Callback=clearMap})
 
