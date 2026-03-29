@@ -1,4 +1,4 @@
--- ลบ UI เก่า
+-- ลบ UI
 pcall(function()
 	for _,v in pairs(game.CoreGui:GetChildren()) do
 		if v.Name=="Rayfield" then v:Destroy() end
@@ -30,23 +30,24 @@ local function getBase()
 	end
 end
 
--- Prompt instant
+-- ⚡ Prompt instant
 task.spawn(function()
 	while task.wait(1) do
 		for _,v in pairs(workspace:GetDescendants()) do
-			if v:IsA("ProximityPrompt") and v.HoldDuration~=0 then
+			if v:IsA("ProximityPrompt") then
 				v.HoldDuration=0
 			end
 		end
 	end
 end)
 
--- Speed
+-- ⚡ Speed
 task.spawn(function()
 	while task.wait() do
 		local c=plr.Character
-		if c and c:FindFirstChildOfClass("Humanoid") then
-			c:FindFirstChildOfClass("Humanoid").WalkSpeed=getgenv().Speed
+		if c then
+			local h=c:FindFirstChildOfClass("Humanoid")
+			if h then h.WalkSpeed=getgenv().Speed end
 		end
 	end
 end)
@@ -60,9 +61,9 @@ local function fire()
 	:FireServer(unpack(args))
 end
 
--- 🔒 AutoLock
+-- 🔒 AutoLock (FIX จริง: เฉพาะ "1s" เท่านั้น)
 task.spawn(function()
-	while task.wait(1) do
+	while task.wait(0.2) do
 		if getgenv().AutoLock then
 			local b=getBase()
 			if b then
@@ -72,11 +73,15 @@ task.spawn(function()
 					local txt=""
 					pcall(function() txt=btn.Info.Timer.Text end)
 
-					if txt=="" or txt:find("1") then
+					-- ✅ ตรงเป๊ะเท่านั้น
+					if txt=="1s" or txt=="" then
 						local hrp=plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
 						if hrp and part then
+							local old=hrp.CFrame
+							hrp.CFrame=part.CFrame+Vector3.new(0,2,0)
 							firetouchinterest(hrp,part,0)
 							firetouchinterest(hrp,part,1)
+							hrp.CFrame=old
 						end
 					end
 				end
@@ -102,24 +107,21 @@ task.spawn(function()
 	end
 end)
 
--- 🛒 AutoBuy (ซื้อจนได้)
+-- 🛒 AutoBuy
 task.spawn(function()
 	while task.wait(0.3) do
 		if getgenv().AutoBuy then
 			local b=getBase()
 			if b and b:FindFirstChild("BrainrotsOnCoveyor") then
 				local found=false
-
 				for _,m in pairs(b.BrainrotsOnCoveyor:GetChildren()) do
 					local ok,rank=pcall(function()
 						return m.HumanoidRootPart.RunwayBGUINew.Main.Rarity.Text
 					end)
-
 					if ok and getgenv().Ranks[rank] then
 						local p=m.HumanoidRootPart:FindFirstChildOfClass("ProximityPrompt")
 						if p then
 							found=true
-							-- 🔥 กดซ้ำจนกว่าจะหาย (ซื้อได้)
 							repeat
 								fireproximityprompt(p)
 								task.wait(0.2)
@@ -127,7 +129,6 @@ task.spawn(function()
 						end
 					end
 				end
-
 				if not found then
 					fire()
 					task.wait(5)
@@ -139,9 +140,9 @@ end)
 
 -- 🗑️ ลบ Gate + Plot
 local function clearMap()
-	local myBase=getBase()
+	local my=getBase()
 	for _,b in pairs(workspace.Bases:GetChildren()) do
-		if b~=myBase then
+		if b~=my then
 			pcall(function()
 				if b:FindFirstChild("Gate") then b.Gate:Destroy() end
 				if b:FindFirstChild("PlotTeritory") then b.PlotTeritory:Destroy() end
@@ -156,7 +157,7 @@ local farm=Win:CreateTab("🌾 Rank")
 
 auto:CreateInput({
 	Name="⚡ Speed",
-	PlaceholderText="เช่น 50",
+	PlaceholderText="50",
 	Callback=function(v)
 		local n=tonumber(v)
 		if n then getgenv().Speed=n end
@@ -165,13 +166,11 @@ auto:CreateInput({
 
 auto:CreateToggle({Name="🧠 Auto Collect",Callback=function(v)getgenv().AutoBrainrots=v end})
 auto:CreateToggle({Name="🛒 Auto Buy",Callback=function(v)getgenv().AutoBuy=v end})
-auto:CreateToggle({Name="🔒 Auto Lock",Callback=function(v)getgenv().AutoLock=v end})
+auto:CreateToggle({Name="🔒 Auto Lock (1s เท่านั้น)",Callback=function(v)getgenv().AutoLock=v end})
 
-auto:CreateButton({Name="🗑️ ลบ ประตูเข้าไม่วาป",Callback=clearMap})
+auto:CreateButton({Name="🗑️ ลบ Gate+Plot",Callback=clearMap})
 
--- เลือกหลายแรงค์
-local ranks={"Common","Uncommon","Rare","Epic","Legendary","Secret"}
-for _,r in ipairs(ranks) do
+for _,r in ipairs({"Common","Uncommon","Rare","Epic","Legendary","Secret"}) do
 	farm:CreateToggle({
 		Name=r,
 		Callback=function(v)
