@@ -184,7 +184,7 @@ auto:CreateToggle({Name="🔒 Auto Lock (วาปไป-กลับ)",Callback
 
 auto:CreateButton({Name="🗑️ ลบ Gate+Plot",Callback=clearMap})
 
-for _,r in ipairs({"Common","Uncommon","Rare","Epic","Legendary","Secret"}) do
+for _,r in ipairs({"Common","Uncommon","Rare","Epic","Legendary","Mythi", "Secret"}) do
 	farm:CreateToggle({
 		Name=r,
 		Callback=function(v)
