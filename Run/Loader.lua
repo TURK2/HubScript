@@ -1,54 +1,26 @@
--- Wait game load
-if not game:IsLoaded() then
-    game.Loaded:Wait()
-end
+if not game:IsLoaded() then game.Loaded:Wait() end
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- Discord
 local Discord = "https://discord.com/invite/v3dAeMKp4N"
-
--- Base Script URL
 local BaseURL = "https://raw.githubusercontent.com/TURK2/HubScript/main/Games/"
+local ScriptURL = BaseURL .. game.PlaceId .. ".lua"
 
--- Current Game ID
-local PlaceID = game.PlaceId
+-- ⚡ โหลดแบบเร็ว (ไม่บล็อก)
+task.spawn(function()
+    local ok,res = pcall(game.HttpGet, game, ScriptURL)
 
--- Script URL
-local ScriptURL = BaseURL .. PlaceID .. ".lua"
+    if not ok or not res or res:find("404") then
+        pcall(function() setclipboard(Discord) end)
+        LocalPlayer:Kick("Game not supported.\nDiscord copied")
+        return
+    end
 
--- Try load script
-local success, result = pcall(function()
-    return game:HttpGet(ScriptURL)
+    -- ⚡ รันทันที
+    local runOk,err = pcall(loadstring(res))
+    if not runOk then
+        pcall(function() setclipboard(Discord) end)
+        LocalPlayer:Kick("Script error.\nJoin Discord")
+    end
 end)
-
--- ถ้าโหลดไม่ได้
-if not success or result == "404: Not Found" or result == "" then
-    
-    -- copy discord
-    pcall(function()
-        setclipboard(Discord)
-    end)
-
-    -- kick player
-    LocalPlayer:Kick("Game not supported.\nJoin our Discord (copied to clipboard): "..Discord)
-
-    return
-end
-
--- ถ้าเจอสคริป
-local runSuccess, runError = pcall(function()
-    loadstring(result)()
-end)
-
--- ถ้าสคริป error
-if not runSuccess then
-    
-    pcall(function()
-        setclipboard(Discord)
-    end)
-
-    LocalPlayer:Kick("Script error.\nContact support in Discord (copied): "..Discord)
-
-end
