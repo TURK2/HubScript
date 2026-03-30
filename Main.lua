@@ -37,11 +37,3 @@ task.spawn(function()
         end
     end
 end)
-
--- ⏱️ เตะถ้าไม่เลือก
-task.spawn(function()
-    task.wait(10)
-    if not selected then
-        plr:Kick("Please select a map")
-    end
-end)
