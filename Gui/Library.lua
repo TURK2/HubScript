@@ -2,12 +2,11 @@ repeat task.wait() until game:IsLoaded()
 
 local CoreGui=game:GetService("CoreGui")
 local UIS=game:GetService("UserInputService")
-local RunService=game:GetService("RunService")
 local TweenService=game:GetService("TweenService")
 
 pcall(function()
-    if CoreGui:FindFirstChild("FixUI") then
-        CoreGui.FixUI:Destroy()
+    if CoreGui:FindFirstChild("V2UI") then
+        CoreGui.V2UI:Destroy()
     end
 end)
 
@@ -16,7 +15,7 @@ local Lib={}
 function Lib:CreateWindow(title)
 
     local gui=Instance.new("ScreenGui",CoreGui)
-    gui.Name="FixUI"
+    gui.Name="V2UI"
 
     local main=Instance.new("Frame",gui)
     main.Size=UDim2.new(0,420,0,270)
@@ -24,16 +23,6 @@ function Lib:CreateWindow(title)
     main.BackgroundColor3=Color3.fromRGB(20,20,25)
     main.ClipsDescendants=true
     Instance.new("UICorner",main).CornerRadius=UDim.new(0,10)
-
-    -- RGB
-    local stroke=Instance.new("UIStroke",main)
-    task.spawn(function()
-        local h=0
-        RunService.RenderStepped:Connect(function()
-            h=(h+0.003)%1
-            stroke.Color=Color3.fromHSV(h,0.7,1)
-        end)
-    end)
 
     -- TOP
     local top=Instance.new("Frame",main)
@@ -45,7 +34,7 @@ function Lib:CreateWindow(title)
     txt.Size=UDim2.new(1,-60,1,0)
     txt.Position=UDim2.new(0,10,0,0)
     txt.BackgroundTransparency=1
-    txt.Text=title or "UI"
+    txt.Text=title
     txt.TextColor3=Color3.new(1,1,1)
     txt.Font=Enum.Font.GothamBold
     txt.TextSize=14
@@ -76,37 +65,34 @@ function Lib:CreateWindow(title)
     local layout=Instance.new("UIListLayout",tabScroll)
     layout.FillDirection=Enum.FillDirection.Horizontal
     layout.HorizontalAlignment=Enum.HorizontalAlignment.Center
-    layout.VerticalAlignment=Enum.VerticalAlignment.Center -- 🔥 แก้ตรงนี้ให้กลางจริง
+    layout.VerticalAlignment=Enum.VerticalAlignment.Center
     layout.Padding=UDim.new(0,8)
 
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         tabScroll.CanvasSize=UDim2.new(0,layout.AbsoluteContentSize.X+40,0,0)
     end)
 
-    -- 🔥 DRAG FIX (ใช้ InputChanged จาก UIS)
+    -- DRAG
     local dragging=false
-    local dragStart, startPos
+    local dragStart,startPos
 
-    top.InputBegan:Connect(function(input)
-        if input.UserInputType==Enum.UserInputType.MouseButton1 
-        or input.UserInputType==Enum.UserInputType.Touch then
+    top.InputBegan:Connect(function(i)
+        if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
             dragging=true
-            dragStart=input.Position
+            dragStart=i.Position
             startPos=main.Position
         end
     end)
 
-    UIS.InputEnded:Connect(function(input)
-        if input.UserInputType==Enum.UserInputType.MouseButton1 
-        or input.UserInputType==Enum.UserInputType.Touch then
+    UIS.InputEnded:Connect(function(i)
+        if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
             dragging=false
         end
     end)
 
-    UIS.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType==Enum.UserInputType.MouseMovement 
-        or input.UserInputType==Enum.UserInputType.Touch) then
-            local delta=input.Position-dragStart
+    UIS.InputChanged:Connect(function(i)
+        if dragging and (i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch) then
+            local delta=i.Position-dragStart
             main.Position=UDim2.new(
                 startPos.X.Scale,
                 startPos.X.Offset+delta.X,
@@ -124,21 +110,18 @@ function Lib:CreateWindow(title)
             toggle.Text="+"
             tabScroll.Visible=false
             content.Visible=false
-            TweenService:Create(main,TweenInfo.new(0.25),{
-                Size=UDim2.new(0,420,0,40)
-            }):Play()
+            TweenService:Create(main,TweenInfo.new(0.25),{Size=UDim2.new(0,420,0,40)}):Play()
         else
             toggle.Text="-"
             tabScroll.Visible=true
             content.Visible=true
-            TweenService:Create(main,TweenInfo.new(0.25),{
-                Size=UDim2.new(0,420,0,270)
-            }):Play()
+            TweenService:Create(main,TweenInfo.new(0.25),{Size=UDim2.new(0,420,0,270)}):Play()
         end
     end)
 
-    -- TAB SYSTEM
+    -- TAB
     function Lib:CreateTab(name)
+
         local page=Instance.new("ScrollingFrame",content)
         page.Size=UDim2.new(1,0,1,0)
         page.BackgroundTransparency=1
@@ -146,8 +129,8 @@ function Lib:CreateWindow(title)
         page.Visible=false
 
         local list=Instance.new("UIListLayout",page)
-        list.Padding=UDim.new(0,6)
-        list.HorizontalAlignment=Enum.HorizontalAlignment.Center -- 🔥 ปุ่มกลาง
+        list.Padding=UDim.new(0,8)
+        list.HorizontalAlignment=Enum.HorizontalAlignment.Center
 
         list:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
             page.CanvasSize=UDim2.new(0,0,0,list.AbsoluteContentSize.Y+10)
@@ -171,17 +154,106 @@ function Lib:CreateWindow(title)
 
         local tab={}
 
+        -- BUTTON
         function tab:Button(text,callback)
             local b=Instance.new("TextButton",page)
-            b.Size=UDim2.new(0.9,0,0,30) -- 🔥 ไม่เต็ม จะดูสวย + อยู่กลาง
+            b.Size=UDim2.new(0.9,0,0,32)
             b.Text=text
             b.BackgroundColor3=Color3.fromRGB(35,35,45)
             b.TextColor3=Color3.new(1,1,1)
             b.Font=Enum.Font.GothamBold
-            b.TextSize=12
+            b.TextSize=13
             Instance.new("UICorner",b)
 
             b.MouseButton1Click:Connect(callback)
+        end
+
+        -- TOGGLE
+        function tab:Toggle(text,callback)
+            local state=false
+
+            local holder=Instance.new("Frame",page)
+            holder.Size=UDim2.new(0.9,0,0,32)
+            holder.BackgroundColor3=Color3.fromRGB(35,35,45)
+            Instance.new("UICorner",holder)
+
+            local label=Instance.new("TextLabel",holder)
+            label.Size=UDim2.new(1,-40,1,0)
+            label.Position=UDim2.new(0,10,0,0)
+            label.BackgroundTransparency=1
+            label.Text=text
+            label.TextColor3=Color3.new(1,1,1)
+            label.Font=Enum.Font.GothamBold
+            label.TextSize=13
+            label.TextXAlignment=Enum.TextXAlignment.Left
+
+            local btn=Instance.new("TextButton",holder)
+            btn.Size=UDim2.new(0,22,0,22)
+            btn.Position=UDim2.new(1,-28,0.5,-11)
+            btn.BackgroundColor3=Color3.fromRGB(60,60,60)
+            btn.Text=""
+            Instance.new("UICorner",btn)
+
+            btn.MouseButton1Click:Connect(function()
+                state=not state
+                TweenService:Create(btn,TweenInfo.new(0.2),{
+                    BackgroundColor3=state and Color3.fromRGB(0,170,255) or Color3.fromRGB(60,60,60)
+                }):Play()
+                callback(state)
+            end)
+        end
+
+        -- SLIDER 🔥
+        function tab:Slider(text,min,max,default,callback)
+            local val=default or min
+
+            local holder=Instance.new("Frame",page)
+            holder.Size=UDim2.new(0.9,0,0,40)
+            holder.BackgroundColor3=Color3.fromRGB(35,35,45)
+            Instance.new("UICorner",holder)
+
+            local label=Instance.new("TextLabel",holder)
+            label.Size=UDim2.new(1,0,0,15)
+            label.BackgroundTransparency=1
+            label.Text=text.." : "..val
+            label.TextColor3=Color3.new(1,1,1)
+            label.Font=Enum.Font.GothamBold
+            label.TextSize=12
+
+            local bar=Instance.new("Frame",holder)
+            bar.Size=UDim2.new(1,-20,0,6)
+            bar.Position=UDim2.new(0,10,1,-15)
+            bar.BackgroundColor3=Color3.fromRGB(50,50,60)
+            Instance.new("UICorner",bar)
+
+            local fill=Instance.new("Frame",bar)
+            fill.Size=UDim2.new((val-min)/(max-min),0,1,0)
+            fill.BackgroundColor3=Color3.fromRGB(0,170,255)
+            Instance.new("UICorner",fill)
+
+            local dragging=false
+
+            bar.InputBegan:Connect(function(i)
+                if i.UserInputType==Enum.UserInputType.MouseButton1 then dragging=true end
+            end)
+
+            UIS.InputEnded:Connect(function(i)
+                if i.UserInputType==Enum.UserInputType.MouseButton1 then dragging=false end
+            end)
+
+            UIS.InputChanged:Connect(function(i)
+                if dragging and i.UserInputType==Enum.UserInputType.MouseMovement then
+                    local pos=(i.Position.X-bar.AbsolutePosition.X)/bar.AbsoluteSize.X
+                    pos=math.clamp(pos,0,1)
+
+                    fill.Size=UDim2.new(pos,0,1,0)
+
+                    val=math.floor((min+(max-min)*pos))
+                    label.Text=text.." : "..val
+
+                    callback(val)
+                end
+            end)
         end
 
         return tab
