@@ -1,143 +1,161 @@
--- NShinnen Library (Rayfield Style)
+repeat task.wait() until game:IsLoaded()
 
-local Library = {}
-local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
+local CoreGui=game:GetService("CoreGui")
+local UIS=game:GetService("UserInputService")
+local RunService=game:GetService("RunService")
+local TweenService=game:GetService("TweenService")
 
-local function Gradient(p)
-    local g=Instance.new("UIGradient",p)
-    g.Color=ColorSequence.new{
-        ColorSequenceKeypoint.new(0,Color3.fromRGB(138,43,226)),
-        ColorSequenceKeypoint.new(1,Color3.fromRGB(0,191,255))
-    }
-end
+-- 🔥 ลบ UI เก่า (สำคัญมาก)
+pcall(function()
+    local old=CoreGui:FindFirstChild("NSHINNEN_UI")
+    if old then old:Destroy() end
+end)
 
-function Library:CreateWindow(cfg)
-    local CoreGui=game:GetService("CoreGui")
+-- 🌐 GUI
+local gui=Instance.new("ScreenGui",CoreGui)
+gui.Name="NSHINNEN_UI"
+gui.ResetOnSpawn=false
 
-    pcall(function()
-        if CoreGui:FindFirstChild("NShinnenUI") then
-            CoreGui.NShinnenUI:Destroy()
-        end
+-- 🌑 MAIN
+local main=Instance.new("Frame",gui)
+main.Size=UDim2.new(0,420,0,270)
+main.Position=UDim2.new(0.5,-210,0.5,-135)
+main.BackgroundColor3=Color3.fromRGB(18,18,22)
+main.ClipsDescendants=true
+Instance.new("UICorner",main).CornerRadius=UDim.new(0,12)
+
+-- 🌫 SHADOW
+local shadow=Instance.new("ImageLabel",main)
+shadow.Size=UDim2.new(1,40,1,40)
+shadow.Position=UDim2.new(0,-20,0,-20)
+shadow.BackgroundTransparency=1
+shadow.Image="rbxassetid://1316045217"
+shadow.ImageTransparency=0.75
+shadow.ZIndex=0
+
+-- 🌈 RGB BORDER
+local stroke=Instance.new("UIStroke",main)
+stroke.Thickness=1.5
+task.spawn(function()
+    local h=0
+    RunService.RenderStepped:Connect(function()
+        h=(h+0.002)%1
+        stroke.Color=Color3.fromHSV(h,0.7,1)
     end)
+end)
 
-    local gui=Instance.new("ScreenGui",CoreGui)
-    gui.Name="NShinnenUI"
+-- 🔝 TOPBAR
+local top=Instance.new("Frame",main)
+top.Size=UDim2.new(1,0,0,45)
+top.BackgroundColor3=Color3.fromRGB(12,12,16)
+Instance.new("UICorner",top).CornerRadius=UDim.new(0,12)
 
-    local main=Instance.new("Frame",gui)
-    main.Size=UDim2.new(0,650,0,420)
-    main.Position=UDim2.new(0.5,-325,0.5,-210)
-    main.BackgroundColor3=Color3.fromRGB(15,15,20)
-    Instance.new("UICorner",main)
+local grad=Instance.new("UIGradient",top)
+grad.Color=ColorSequence.new{
+    ColorSequenceKeypoint.new(0,Color3.fromRGB(140,50,255)),
+    ColorSequenceKeypoint.new(1,Color3.fromRGB(0,200,255))
+}
 
-    -- RGB
-    local stroke=Instance.new("UIStroke",main)
-    task.spawn(function()
-        local h=0
-        RunService.RenderStepped:Connect(function()
-            h=(h+0.003)%1
-            stroke.Color=Color3.fromHSV(h,0.7,1)
-        end)
-    end)
+-- TITLE
+local title=Instance.new("TextLabel",top)
+title.Size=UDim2.new(1,-60,1,0)
+title.Position=UDim2.new(0,12,0,0)
+title.BackgroundTransparency=1
+title.Text="N-SHINNEN UI"
+title.TextColor3=Color3.new(1,1,1)
+title.Font=Enum.Font.GothamBold
+title.TextSize=15
+title.TextXAlignment=Enum.TextXAlignment.Left
 
-    -- Topbar
-    local top=Instance.new("Frame",main)
-    top.Size=UDim2.new(1,0,0,50)
-    top.BackgroundColor3=Color3.fromRGB(10,10,12)
+-- 🔘 MINIMIZE
+local toggle=Instance.new("TextButton",top)
+toggle.Size=UDim2.new(0,30,0,30)
+toggle.Position=UDim2.new(1,-38,0,7)
+toggle.Text="-"
+toggle.BackgroundTransparency=1
+toggle.TextColor3=Color3.new(1,1,1)
 
-    local title=Instance.new("TextLabel",top)
-    title.Size=UDim2.new(1,0,1,0)
-    title.BackgroundTransparency=1
-    title.Text=cfg.Title or "NShinnen UI"
-    title.TextColor3=Color3.new(1,1,1)
+-- 📦 CONTENT
+local content=Instance.new("Frame",main)
+content.Size=UDim2.new(1,0,1,-90)
+content.Position=UDim2.new(0,0,0,45)
+content.BackgroundTransparency=1
 
-    -- ปิด
-    local close=Instance.new("TextButton",top)
-    close.Size=UDim2.new(0,30,0,30)
-    close.Position=UDim2.new(1,-35,0,10)
-    close.Text="X"
-    close.BackgroundTransparency=1
-    close.MouseButton1Click:Connect(function()
-        gui:Destroy()
-    end)
+-- 📌 TAB BAR (เลื่อน)
+local tabBar=Instance.new("ScrollingFrame",main)
+tabBar.Size=UDim2.new(1,0,0,45)
+tabBar.Position=UDim2.new(0,0,1,-45)
+tabBar.BackgroundColor3=Color3.fromRGB(12,12,16)
+tabBar.ScrollBarThickness=3
+tabBar.AutomaticCanvasSize=Enum.AutomaticSize.X
+tabBar.ScrollingDirection=Enum.ScrollingDirection.X
+Instance.new("UICorner",tabBar).CornerRadius=UDim.new(0,10)
 
-    -- Sidebar (Tab)
-    local sidebar=Instance.new("Frame",main)
-    sidebar.Size=UDim2.new(0,150,1,-50)
-    sidebar.Position=UDim2.new(0,0,0,50)
-    sidebar.BackgroundColor3=Color3.fromRGB(20,20,25)
+local layout=Instance.new("UIListLayout",tabBar)
+layout.FillDirection=Enum.FillDirection.Horizontal
+layout.Padding=UDim.new(0,8)
+layout.VerticalAlignment=Enum.VerticalAlignment.Center
 
-    local container=Instance.new("Frame",main)
-    container.Size=UDim2.new(1,-150,1,-50)
-    container.Position=UDim2.new(0,150,0,50)
-    container.BackgroundTransparency=1
+-- 🔥 DRAG (ลาก UI ได้จริง)
+local dragging=false
+local dragInput,dragStart,startPos
 
-    local tabs = {}
+top.InputBegan:Connect(function(input)
+    if input.UserInputType==Enum.UserInputType.MouseButton1 
+    or input.UserInputType==Enum.UserInputType.Touch then
+        dragging=true
+        dragStart=input.Position
+        startPos=main.Position
 
-    function Library:CreateTab(name)
-        local btn=Instance.new("TextButton",sidebar)
-        btn.Size=UDim2.new(1,0,0,40)
-        btn.Text=name
-        btn.BackgroundColor3=Color3.fromRGB(30,30,35)
-
-        local page=Instance.new("Frame",container)
-        page.Size=UDim2.new(1,0,1,0)
-        page.Visible=false
-
-        local layout=Instance.new("UIListLayout",page)
-        layout.Padding=UDim.new(0,5)
-
-        btn.MouseButton1Click:Connect(function()
-            for _,v in pairs(container:GetChildren()) do
-                if v:IsA("Frame") then v.Visible=false end
+        input.Changed:Connect(function()
+            if input.UserInputState==Enum.UserInputState.End then
+                dragging=false
             end
-            page.Visible=true
         end)
-
-        tabs[name]=page
-        return page
     end
+end)
 
-    function Library:CreateButton(parent,text,callback)
-        local btn=Instance.new("TextButton",parent)
-        btn.Size=UDim2.new(1,0,0,40)
-        btn.Text=text
-        btn.BackgroundColor3=Color3.fromRGB(40,40,45)
-
-        btn.MouseButton1Click:Connect(callback)
+top.InputChanged:Connect(function(input)
+    if input.UserInputType==Enum.UserInputType.MouseMovement 
+    or input.UserInputType==Enum.UserInputType.Touch then
+        dragInput=input
     end
+end)
 
-    -- Drag
-    local dragging=false
-    local dragStart,startPos
+RunService.RenderStepped:Connect(function()
+    if dragging and dragInput then
+        local delta=dragInput.Position-dragStart
+        main.Position=UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset+delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset+delta.Y
+        )
+    end
+end)
 
-    top.InputBegan:Connect(function(i)
-        if i.UserInputType==Enum.UserInputType.MouseButton1 then
-            dragging=true
-            dragStart=i.Position
-            startPos=main.Position
-        end
-    end)
+-- 🔽 MINIMIZE FIX (ไม่ให้ tab ลอย)
+local minimized=false
+toggle.MouseButton1Click:Connect(function()
+    minimized=not minimized
 
-    UIS.InputEnded:Connect(function(i)
-        if i.UserInputType==Enum.UserInputType.MouseButton1 then
-            dragging=false
-        end
-    end)
+    if minimized then
+        toggle.Text="+"
+        content.Visible=false
+        tabBar.Visible=false
 
-    UIS.InputChanged:Connect(function(i)
-        if dragging and i.UserInputType==Enum.UserInputType.MouseMovement then
-            local delta=i.Position-dragStart
-            main.Position=UDim2.new(
-                startPos.X.Scale,
-                startPos.X.Offset+delta.X,
-                startPos.Y.Scale,
-                startPos.Y.Offset+delta.Y
-            )
-        end
-    end)
+        TweenService:Create(main,TweenInfo.new(0.25),{
+            Size=UDim2.new(0,420,0,45)
+        }):Play()
+    else
+        toggle.Text="-"
 
-    return Library
-end
+        TweenService:Create(main,TweenInfo.new(0.25),{
+            Size=UDim2.new(0,420,0,270)
+        }):Play()
 
-return Library
+        task.wait(0.2)
+        content.Visible=true
+        tabBar.Visible=true
+    end
+end)
