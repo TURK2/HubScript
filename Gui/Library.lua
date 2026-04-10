@@ -1,4 +1,4 @@
--- [[ TURK-HUB V10: THE FINAL PREMIER UI ]] --
+-- [[ TURK-HUB V10.1: FIXED MOBILE DRAG TOGGLE ]] --
 local Library = {Flags = {}, Keybinds = {}}
 local TS, UIS, plr = game:GetService("TweenService"), game:GetService("UserInputService"), game:GetService("Players").LocalPlayer
 
@@ -6,20 +6,16 @@ local TS, UIS, plr = game:GetService("TweenService"), game:GetService("UserInput
 for _, v in pairs(game:GetService("CoreGui"):GetChildren()) do if v.Name == "TURK_V10" then v:Destroy() end end
 
 local Theme = {
-    Main = Color3.fromRGB(12, 12, 15), 
-    Top = Color3.fromRGB(20, 20, 25), 
-    Accent = Color3.fromRGB(0, 180, 255),
-    Secondary = Color3.fromRGB(25, 25, 30),
-    Text = Color3.fromRGB(255, 255, 255), 
-    TextSemi = Color3.fromRGB(180, 180, 180),
-    Element = Color3.fromRGB(22, 22, 28),
-    Error = Color3.fromRGB(255, 80, 80)
+    Main = Color3.fromRGB(12, 12, 15), Top = Color3.fromRGB(20, 20, 25), Accent = Color3.fromRGB(0, 180, 255),
+    Secondary = Color3.fromRGB(25, 25, 30), Text = Color3.fromRGB(255, 255, 255), TextSemi = Color3.fromRGB(180, 180, 180),
+    Element = Color3.fromRGB(22, 22, 28), Error = Color3.fromRGB(255, 80, 80)
 }
 
 local function Tween(obj, goal, t) 
     TS:Create(obj, TweenInfo.new(t or 0.3, Enum.EasingStyle.Quint), goal):Play() 
 end
 
+-- [ Improved Draggable System ]
 local function MakeDraggable(dragPart, target)
     local dragging, dragStart, startPos
     dragPart.InputBegan:Connect(function(input)
@@ -39,41 +35,45 @@ end
 function Library:CreateWindow(Config)
     local Gui = Instance.new("ScreenGui", game:GetService("CoreGui")); Gui.Name = "TURK_V10"; Gui.IgnoreGuiInset = true
     
-    -- [ Key System ]
-    if Config.KeySystem then
-        local KeyMain = Instance.new("Frame", Gui); KeyMain.Size = UDim2.new(0, 320, 0, 190); KeyMain.Position = UDim2.new(0.5, 0, 0.5, 0); KeyMain.AnchorPoint = Vector2.new(0.5, 0.5); KeyMain.BackgroundColor3 = Theme.Main
-        Instance.new("UICorner", KeyMain).CornerRadius = UDim.new(0, 12); local KSrt = Instance.new("UIStroke", KeyMain); KSrt.Color = Theme.Accent; KSrt.Thickness = 2; MakeDraggable(KeyMain, KeyMain)
-        local KTitle = Instance.new("TextLabel", KeyMain); KTitle.Size = UDim2.new(1, 0, 0, 45); KTitle.Text = Config.KeySettings.Title; KTitle.TextColor3 = Theme.Accent; KTitle.Font = "GothamBlack"; KTitle.TextSize = 16; KTitle.BackgroundTransparency = 1
-        local KInput = Instance.new("TextBox", KeyMain); KInput.Size = UDim2.new(0.85, 0, 0, 40); KInput.Position = UDim2.new(0.075, 0, 0.35, 0); KInput.BackgroundColor3 = Theme.Secondary; KInput.Text = ""; KInput.PlaceholderText = "Enter Access Key..."; KInput.TextColor3 = Theme.Text; KInput.Font = "GothamBold"; KInput.TextSize = 14; Instance.new("UICorner", KInput).CornerRadius = UDim.new(0, 8)
-        local KCheck = Instance.new("TextButton", KeyMain); KCheck.Size = UDim2.new(0.85, 0, 0, 40); KCheck.Position = UDim2.new(0.075, 0, 0.65, 0); KCheck.BackgroundColor3 = Theme.Accent; KCheck.Text = "Unlock Interface"; KCheck.TextColor3 = Theme.Main; KCheck.Font = "GothamBlack"; KCheck.TextSize = 14; Instance.new("UICorner", KCheck).CornerRadius = UDim.new(0, 8)
-        local Verified = false
-        KCheck.MouseButton1Click:Connect(function()
-            for _, v in pairs(Config.KeySettings.Key) do if KInput.Text == v then Verified = true break end end
-            if Verified then KeyMain:Destroy() else KSrt.Color = Theme.Error; KCheck.Text = "Access Denied!"; task.wait(1); KSrt.Color = Theme.Accent; KCheck.Text = "Unlock Interface" end
-        end)
-        while not Verified do task.wait() end
-    end
-
     -- [ Responsive UI Setup ]
     local View = workspace.CurrentCamera.ViewportSize
     local isMobile = UIS.TouchEnabled
     local UI_Size = isMobile and UDim2.new(0, 430, 0, 280) or UDim2.new(0, 580, 0, 380)
 
+    -- [ Main Frame ]
     local Main = Instance.new("Frame", Gui); Main.Size = UDim2.new(0, 0, 0, 0); Main.Position = UDim2.new(0.5, 0, 0.5, 0); Main.AnchorPoint = Vector2.new(0.5, 0.5); Main.BackgroundColor3 = Theme.Main; Main.ClipsDescendants = true
     Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 14); local MStr = Instance.new("UIStroke", Main); MStr.Color = Color3.fromRGB(40, 40, 45)
-
     local Top = Instance.new("Frame", Main); Top.Size = UDim2.new(1, 0, 0, 45); Top.BackgroundColor3 = Theme.Top; Instance.new("UICorner", Top).CornerRadius = UDim.new(0, 14); MakeDraggable(Top, Main)
     local T = Instance.new("TextLabel", Top); T.Size = UDim2.new(1,-40,1,0); T.Position = UDim2.new(0,20,0,0); T.Text = Config.Name; T.TextColor3 = Theme.Accent; T.Font = "GothamBlack"; T.TextSize = 15; T.TextXAlignment = "Left"; T.BackgroundTransparency = 1
 
-    local TogF = Instance.new("Frame", Gui); TogF.Size = UDim2.new(0, 48, 0, 48); TogF.Position = UDim2.new(0.05, 0, 0.15, 0); TogF.BackgroundColor3 = Theme.Main; Instance.new("UICorner", TogF).CornerRadius = UDim.new(1, 0); Instance.new("UIStroke", TogF).Color = Theme.Accent
-    local TBtn = Instance.new("TextButton", TogF); TBtn.Size = UDim2.new(1,0,1,0); TBtn.BackgroundTransparency = 1; TBtn.Text = "T"; TBtn.TextColor3 = Theme.Accent; TBtn.Font = "GothamBlack"; TBtn.TextSize = 22; MakeDraggable(TogF, TogF)
+    -- [[ FIX: TOGGLE BUTTON ลากได้ทั้งกรอบ ]]
+    local TogF = Instance.new("Frame", Gui)
+    TogF.Name = "ToggleCircle"
+    TogF.Size = UDim2.new(0, 50, 0, 50)
+    TogF.Position = UDim2.new(0.05, 0, 0.15, 0)
+    TogF.BackgroundColor3 = Theme.Main
+    TogF.Active = true -- ต้องเปิด Active เพื่อให้รับ Input ในการลากได้ดีขึ้น
+    Instance.new("UICorner", TogF).CornerRadius = UDim.new(1, 0)
+    Instance.new("UIStroke", TogF).Color = Theme.Accent
     
+    local TBtn = Instance.new("TextButton", TogF)
+    TBtn.Size = UDim2.new(1,0,1,0)
+    TBtn.BackgroundTransparency = 1
+    TBtn.Text = "T"
+    TBtn.TextColor3 = Theme.Accent
+    TBtn.Font = "GothamBlack"
+    TBtn.TextSize = 22
+    
+    -- ลากได้ทั้งกรอบ TogF
+    MakeDraggable(TogF, TogF) 
+
     local open = true
     TBtn.MouseButton1Click:Connect(function()
         open = not open; Tween(Main, {Size = open and UI_Size or UDim2.new(0,0,0,0)})
         Tween(TBtn, {TextColor3 = open and Theme.Accent or Theme.TextSemi})
     end)
 
+    -- [ ต่อไปคือส่วน Layout เหมือนเดิม... ]
     local Side = Instance.new("ScrollingFrame", Main); Side.Size = UDim2.new(0, 140, 1, -55); Side.Position = UDim2.new(0, 10, 0, 50); Side.BackgroundTransparency = 1; Side.ScrollBarThickness = 0
     Instance.new("UIListLayout", Side).Padding = UDim.new(0, 8)
     local Container = Instance.new("Frame", Main); Container.Size = UDim2.new(1, -170, 1, -65); Container.Position = UDim2.new(0, 160, 0, 55); Container.BackgroundTransparency = 1
