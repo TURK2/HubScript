@@ -1,9 +1,8 @@
--- [[ TURK-HUB V17: FULL RAYFIELD ULTIMATE REPLICA ]] --
 local Library = {Flags = {}, Keybinds = {}}
 local TS, UIS, plr = game:GetService("TweenService"), game:GetService("UserInputService"), game:GetService("Players").LocalPlayer
 
 -- [ Cleanup ]
-for _, v in pairs(game:GetService("CoreGui"):GetChildren()) do if v.Name == "TURK_V17" then v:Destroy() end end
+for _, v in pairs(game:GetService("CoreGui"):GetChildren()) do if v.Name == "TURK-HUB" then v:Destroy() end end
 
 local Theme = {
     Main = Color3.fromRGB(12, 12, 15), Top = Color3.fromRGB(18, 18, 22), Accent = Color3.fromRGB(0, 230, 255),
